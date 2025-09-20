@@ -65,13 +65,13 @@ public class ChessPiece {
         } else if (type == PieceType.ROOK) {
             moves = new Rook();
         } else if (type == PieceType.KNIGHT) {
-
+            moves = new Knight();
         } else if (type == PieceType.BISHOP) {
             moves = new Bishop();
         } else if (type == PieceType.QUEEN) {
             moves = new Queen();
         } else if (type == PieceType.KING) {
-
+            moves = new King();
         }
         // throw new RuntimeException("Not implemented");
         return moves.calculateMoves(this, board, myPosition);
