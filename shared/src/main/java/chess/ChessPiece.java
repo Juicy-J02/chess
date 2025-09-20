@@ -58,8 +58,23 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return List.of();
+        PieceMoveCalculator moves = null;
+
+        if (type == PieceType.PAWN) {
+            moves = new Pawn();
+        } else if (type == PieceType.ROOK) {
+
+        } else if (type == PieceType.KNIGHT) {
+
+        } else if (type == PieceType.BISHOP) {
+
+        } else if (type == PieceType.QUEEN) {
+
+        } else if (type == PieceType.KING) {
+
+        }
         // throw new RuntimeException("Not implemented");
+        return moves.calculateMoves(this, board, myPosition);
     }
 
     @Override
