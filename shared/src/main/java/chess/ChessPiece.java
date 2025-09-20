@@ -63,13 +63,13 @@ public class ChessPiece {
         if (type == PieceType.PAWN) {
             moves = new Pawn();
         } else if (type == PieceType.ROOK) {
-
+            moves = new Rook();
         } else if (type == PieceType.KNIGHT) {
 
         } else if (type == PieceType.BISHOP) {
-
+            moves = new Bishop();
         } else if (type == PieceType.QUEEN) {
-
+            moves = new Queen();
         } else if (type == PieceType.KING) {
 
         }
