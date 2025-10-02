@@ -100,6 +100,19 @@ public class ChessBoard {
         // throw new RuntimeException("Not implemented");
     }
 
+    public ChessBoard copy() {
+        ChessBoard board_copy = new ChessBoard();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                ChessPiece piece = spaces[i][j];
+                if (piece != null) {
+                    board_copy.spaces[i][j] = new ChessPiece(piece.getTeamColor(), piece.getPieceType());
+                }
+            }
+        }
+        return board_copy;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
