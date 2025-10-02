@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -58,7 +59,28 @@ public class ChessGame {
         if (piece == null) {
             return null;
         }
-        return piece.pieceMoves(board, startPosition);
+
+        Collection<ChessMove> moves = piece.pieceMoves(board, startPosition);
+        Collection<ChessMove> validMoves = new ArrayList<>();
+
+        for (ChessMove move : moves) {
+            ChessBoard temp_board = board.copy();
+            temp_board.removePiece(startPosition);
+            if (move.getPromotionPiece() != null) {
+                temp_board.addPiece(move.getEndPosition(), new ChessPiece(turn, move.getPromotionPiece()));
+            } else {
+                temp_board.addPiece(move.getEndPosition(), piece);
+            }
+            ChessGame temp_game = new ChessGame();
+            temp_game.setBoard(temp_board);
+            temp_game.setTeamTurn(turn);
+
+            if (!temp_game.isInCheck(piece.getTeamColor())) {
+                validMoves.add(move);
+            }
+        }
+
+        return validMoves;
         // throw new RuntimeException("Not implemented");
     }
 
@@ -83,19 +105,6 @@ public class ChessGame {
 
         Collection<ChessMove> moves = validMoves(start);
         if (moves == null || !moves.contains(move)) {
-            throw new InvalidMoveException();
-        }
-
-        ChessBoard temp_board = board.copy();
-        temp_board.removePiece(start);
-        if (move.getPromotionPiece() != null) {
-            temp_board.addPiece(end, new ChessPiece(turn, move.getPromotionPiece()));
-        } else {
-            temp_board.addPiece(end, piece);
-        }
-        ChessGame temp_game = new ChessGame();
-        temp_game.setBoard(temp_board);
-        if (temp_game.isInCheck(turn)) {
             throw new InvalidMoveException();
         }
 
