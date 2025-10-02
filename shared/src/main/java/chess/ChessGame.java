@@ -86,6 +86,19 @@ public class ChessGame {
             throw new InvalidMoveException();
         }
 
+        ChessBoard temp_board = board.copy();
+        temp_board.removePiece(start);
+        if (move.getPromotionPiece() != null) {
+            temp_board.addPiece(end, new ChessPiece(turn, move.getPromotionPiece()));
+        } else {
+            temp_board.addPiece(end, piece);
+        }
+        ChessGame temp_game = new ChessGame();
+        temp_game.setBoard(temp_board);
+        if (temp_game.isInCheck(turn)) {
+            throw new InvalidMoveException();
+        }
+
         board.removePiece(start);
 
         if (move.getPromotionPiece() != null) {
@@ -153,7 +166,7 @@ public class ChessGame {
                         for (ChessMove move : moves) {
                             ChessGame temp_game = new ChessGame();
                             temp_game.setBoard(board.copy());
-                            temp_game.setTeamTurn(turn);
+                            temp_game.setTeamTurn(teamColor);
                             try {
                                 temp_game.makeMove(move);
                                 if (!temp_game.isInCheck(teamColor)) {
@@ -179,7 +192,34 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if (isInCheck(teamColor)) {
+            return false;
+        }
+
+        for (int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; j++) {
+                ChessPosition position = new ChessPosition(i, j);
+                ChessPiece piece = board.getPiece(position);
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    Collection<ChessMove> moves = piece.pieceMoves(board, position);
+                    if (moves != null) {
+                        for (ChessMove move : moves) {
+                            ChessGame temp_game = new ChessGame();
+                            temp_game.setBoard(board.copy());
+                            temp_game.setTeamTurn(teamColor);
+                            try {
+                                temp_game.makeMove(move);
+                                return false;
+                            } catch (InvalidMoveException _) {
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+
+        // throw new RuntimeException("Not implemented");
     }
 
     /**
