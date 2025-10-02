@@ -28,6 +28,10 @@ public class ChessBoard {
         // throw new RuntimeException("Not implemented");
     }
 
+    public void removePiece(ChessPosition position) {
+        spaces[position.getRow() - 1][position.getColumn() - 1] = null;
+    }
+
     /**
      * Gets a chess piece on the chessboard
      *
@@ -62,6 +66,12 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                spaces[i][j] = null;
+            }
+        }
+
         for (int i = 1; i < 9; i++) {
             addPiece(new ChessPosition(2, i), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
             addPiece(new ChessPosition(7, i), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));

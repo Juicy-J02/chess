@@ -1,7 +1,6 @@
 package chess;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -31,8 +30,6 @@ public class ChessPiece {
         ROOK,
         PAWN
     }
-
-
 
     /**
      * @return Which team this chess piece belongs to
