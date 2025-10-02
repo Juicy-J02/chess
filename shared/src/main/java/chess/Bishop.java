@@ -28,8 +28,6 @@ public class Bishop implements PieceMoveCalculator {
         while (true) {
             ChessPosition move = new ChessPosition(row, col);
 
-            System.out.println(row);
-
             if (!board.validPosition(move)) {
                 break;
             }

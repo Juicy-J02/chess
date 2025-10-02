@@ -31,8 +31,6 @@ public class King implements PieceMoveCalculator {
 
         ChessPosition move = new ChessPosition(row, col);
 
-        System.out.println(row);
-
         if (board.validPosition(move) && (board.emptyPosition(move) || board.isEnemy(move, piece))) {
             moves.add(new ChessMove(position, move, null));
         }

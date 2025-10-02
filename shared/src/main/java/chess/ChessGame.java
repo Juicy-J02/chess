@@ -115,7 +115,7 @@ public class ChessGame {
             for (int j = 1; j < 9; j++) {
                 ChessPosition position = new ChessPosition(i, j);
                 ChessPiece piece = board.getPiece(position);
-                if (piece != null && piece.getTeamColor() != teamColor) {
+                if (piece != null) {
                     Collection<ChessMove> moves = piece.pieceMoves(board, position);
                     if (moves != null) {
                         for (ChessMove move : moves) {
@@ -139,7 +139,36 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if (!isInCheck(teamColor)) {
+            return false;
+        }
+
+        for (int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; j++) {
+                ChessPosition position = new ChessPosition(i, j);
+                ChessPiece piece = board.getPiece(position);
+                if (piece != null) {
+                    Collection<ChessMove> moves = piece.pieceMoves(board, position);
+                    if (moves != null) {
+                        for (ChessMove move : moves) {
+                            ChessGame temp_game = new ChessGame();
+                            temp_game.setBoard(board.copy());
+                            temp_game.setTeamTurn(turn);
+                            try {
+                                temp_game.makeMove(move);
+                                if (!temp_game.isInCheck(teamColor)) {
+                                    return false;
+                                }
+                            } catch (InvalidMoveException _) {
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+
+        // throw new RuntimeException("Not implemented");
     }
 
     /**
