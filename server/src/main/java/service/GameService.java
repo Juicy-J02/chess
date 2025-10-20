@@ -50,7 +50,7 @@ public class GameService {
         return new CreateGameResult(game.getGameID());
     }
 
-    void joinGame(JoinGameRequest joinGameRequest) throws DataAccessException {
+    public void joinGame(JoinGameRequest joinGameRequest) throws DataAccessException {
 
         AuthData authData = authDAO.getAuthByToken(joinGameRequest.authToken());
         if (authData == null) {
