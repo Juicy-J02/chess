@@ -12,7 +12,7 @@ public class AuthDataAccess implements AuthDAO {
     @Override
     public void createAuthData(AuthData authData) throws DataAccessException {
         if (authDatas.containsKey(authData.getAuthToken())) {
-            throw new DataAccessException("User already exists");
+            throw new DataAccessException("AuthToken already exists");
         }
         authDatas.put(authData.getAuthToken(), authData);
     }
@@ -28,6 +28,11 @@ public class AuthDataAccess implements AuthDAO {
     @Override
     public AuthData getAuthByToken(String authToken) throws DataAccessException {
         return authDatas.get(authToken);
+    }
+
+    @Override
+    public AuthData getAuthByUsername(String username) throws DataAccessException {
+       return authDatas.get(username);
     }
 
     @Override
