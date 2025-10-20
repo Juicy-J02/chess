@@ -18,7 +18,6 @@ public class GameDataAccess implements GameDAO {
         int id = gameID++;
         GameData game = new GameData(gameID, null, null, gameName, new ChessGame());
         games.put(id, game);
-
     }
 
     @Override

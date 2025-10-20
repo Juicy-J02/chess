@@ -40,7 +40,6 @@ public class UserService {
     }
     public void logout(LogoutRequest logoutRequest) throws DataAccessException {
         AuthData authData = authDAO.getAuthByToken(logoutRequest.authToken());
-
         if (authData == null) {
             throw new DataAccessException("No Auth data");
         }
