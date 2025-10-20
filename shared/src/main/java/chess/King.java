@@ -21,7 +21,8 @@ public class King implements PieceMoveCalculator {
         return moves;
     }
 
-    private void directionalMove(ChessPiece piece, ChessBoard board, ChessPosition position, int x, int y, Collection<ChessMove> moves) {
+    private void directionalMove(ChessPiece piece, ChessBoard board, ChessPosition position,
+                                 int x, int y, Collection<ChessMove> moves) {
 
         int row = position.getRow();
         int col = position.getColumn();
