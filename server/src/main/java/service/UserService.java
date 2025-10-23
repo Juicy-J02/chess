@@ -17,6 +17,10 @@ public class UserService {
     }
 
     public RegisterResult register(RegisterRequest registerRequest) throws DataAccessException {
+        if (userDAO.getUserByUsername(registerRequest.username()) != null) {
+            throw new DataAccessException("User already exists");
+        }
+
         UserData user = new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email());
         userDAO.createUserData(user);
 

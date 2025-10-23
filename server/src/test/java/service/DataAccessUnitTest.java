@@ -9,7 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UnitTest {
+public class DataAccessUnitTest {
 
     private UserDAO userDAO;
     private AuthDAO authDAO;
@@ -117,4 +117,36 @@ public class UnitTest {
         assertNull(found.getWhiteUsername());
     }
 
+    @Test
+    public void testGetGameSuccessfully() throws DataAccessException {
+        Integer gameID = gameDAO.createGame("biggest_game");
+        GameData found = gameDAO.getGame(gameID);
+
+        assertNotNull(found);
+        assertEquals(gameID, found.getGameID());
+        assertEquals("biggest_game", found.getGameName());
+        assertNull(found.getWhiteUsername());
+        assertNull(found.getBlackUsername());
+    }
+
+    @Test
+    public void testJoinGameSuccessfully() throws DataAccessException {
+        gameDAO.createGame("biggest_game");
+        gameDAO.joinGame(1, "john", ChessGame.TeamColor.WHITE);
+        GameData found = gameDAO.getGame(1);
+        assertEquals("john", found.getWhiteUsername());
+    }
+
+    @Test
+    public void testJoinGameUnsuccessfully() throws DataAccessException {
+        Integer gameID = gameDAO.createGame("biggest_game");
+        gameDAO.joinGame(gameID, "john", ChessGame.TeamColor.WHITE);
+        DataAccessException exception = assertThrows(DataAccessException.class, () ->
+                gameDAO.joinGame(gameID, "harry", ChessGame.TeamColor.WHITE)
+        );
+        assertEquals("White side already taken", exception.getMessage());
+        GameData found = gameDAO.getGame(gameID);
+        assertEquals("john", found.getWhiteUsername());
+        assertNull(found.getBlackUsername());
+    }
 }
