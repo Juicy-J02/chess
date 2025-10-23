@@ -1,6 +1,5 @@
 package service;
 
-import chess.ChessGame;
 import dataaccess.*;
 import model.AuthData;
 import model.GameData;
@@ -114,7 +113,7 @@ public class DataAccessUnitTest {
     @Test
     public void testJoinGameSuccessfully() throws DataAccessException {
         gameDAO.createGame("biggest_game");
-        gameDAO.joinGame(1, "john", ChessGame.TeamColor.WHITE);
+        gameDAO.joinGame(1, "john", "WHITE");
         GameData found = gameDAO.getGame(1);
         assertEquals("john", found.getWhiteUsername());
     }

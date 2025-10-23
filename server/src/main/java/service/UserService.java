@@ -48,7 +48,6 @@ public class UserService {
         if (authData == null) {
             throw new DataAccessException("Error: No Auth data");
         }
-
         authDAO.deleteAuthData(authData.getAuthToken());
     }
 }

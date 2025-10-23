@@ -1,6 +1,4 @@
 package service;
 
-import chess.ChessGame;
-
-public record JoinGameRequest(String authToken, ChessGame.TeamColor teamColor, Integer gameID) {
+public record JoinGameRequest(String playerColor, Integer gameID) {
 }

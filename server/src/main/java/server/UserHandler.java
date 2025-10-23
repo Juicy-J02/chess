@@ -3,7 +3,6 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import io.javalin.http.Context;
-import model.UserData;
 import service.*;
 
 public class UserHandler {
@@ -17,14 +16,13 @@ public class UserHandler {
 
     public void registerUser(Context ctx) {
         try {
-            UserData user = serializer.fromJson(ctx.body(), UserData.class);
+            RegisterRequest registerRequest = serializer.fromJson(ctx.body(), RegisterRequest.class);
 
-            if (user.getUsername() == null || user.getPassword() == null) {
+            if (registerRequest.username() == null || registerRequest.password() == null) {
                 ctx.status(400).json(new Message("Error: bad request"));
                 return;
             }
 
-            RegisterRequest registerRequest = new RegisterRequest(user.getUsername(), user.getPassword(), user.getEmail());
             RegisterResult result = userService.register(registerRequest);
             ctx.status(200).json(result);
 
@@ -35,14 +33,14 @@ public class UserHandler {
 
     public void loginUser(Context ctx) {
         try {
-            UserData user = serializer.fromJson(ctx.body(), UserData.class);
+            LoginRequest loginrequest = serializer.fromJson(ctx.body(), LoginRequest.class);
 
-            if (user.getUsername() == null || user.getPassword() == null) {
+            if (loginrequest.username() == null || loginrequest.password() == null) {
                 ctx.status(400).json(new Message("Error: bad request"));
                 return;
             }
 
-            LoginRequest loginRequest = new LoginRequest(user.getUsername(), user.getPassword());
+            LoginRequest loginRequest = new LoginRequest(loginrequest.username(), loginrequest.password());
             LoginResult result = userService.login(loginRequest);
             ctx.status(200).json(result);
 
@@ -55,7 +53,7 @@ public class UserHandler {
         try {
             String authToken = ctx.header("authorization");
             if (authToken == null) {
-                ctx.status(403).json(new Message("Error: unauthorized"));
+                ctx.status(401).json(new Message("Error: unauthorized"));
                 return;
             }
 

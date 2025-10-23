@@ -1,30 +1,29 @@
 package server;
 
-import com.google.gson.Gson;
 import dataaccess.*;
 import io.javalin.Javalin;
 import io.javalin.json.JavalinGson;
+import service.ClearService;
 import service.GameService;
 import service.UserService;
 
 public class Server {
 
     private final Javalin javalin;
-    private final UserDAO userDataAccess;
-    private final GameDAO gameDataAccess;
-    private final AuthDAO authDataAccess;
 
     public Server() {
 
-        userDataAccess = new UserDataAccess();
-        gameDataAccess = new GameDataAccess();
-        authDataAccess = new AuthDataAccess();
+        UserDAO userDataAccess = new UserDataAccess();
+        GameDAO gameDataAccess = new GameDataAccess();
+        AuthDAO authDataAccess = new AuthDataAccess();
 
         UserService userService = new UserService(userDataAccess, authDataAccess);
         GameService gameService = new GameService(authDataAccess, gameDataAccess);
+        ClearService clearService = new ClearService(userDataAccess, authDataAccess, gameDataAccess);
 
         UserHandler userHandler = new UserHandler(userService);
         GameHandler gameHandler = new GameHandler(gameService);
+        ClearHandler clearHandler = new ClearHandler(clearService);
 
         javalin = Javalin.create(config -> {
             config.staticFiles.add("web");
@@ -39,15 +38,7 @@ public class Server {
         javalin.post("/game", gameHandler::createGame);
         javalin.put("/game", gameHandler::joinGame);
 
-        javalin.delete("/db", ctx -> {
-            userDataAccess.clearUserData();
-            gameDataAccess.clearGames();;
-            authDataAccess.clearAuthData();
-
-            ctx.status(200).json(new Object() {
-                public final String message = "Database cleared";
-            });
-        });
+        javalin.delete("/db", clearHandler::clearDatabase);
     }
 
     public int run(int desiredPort) {

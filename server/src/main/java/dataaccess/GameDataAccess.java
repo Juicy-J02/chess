@@ -33,20 +33,21 @@ public class GameDataAccess implements GameDAO {
     }
 
     @Override
-    public void joinGame(int gameID, String userName, ChessGame.TeamColor playerColor) throws DataAccessException {
+    public void joinGame(int gameID, String userName, String playerColor) throws DataAccessException {
         GameData game = getGame(gameID);
 
-        if (playerColor == ChessGame.TeamColor.WHITE && game.getWhiteUsername() != null) {
+        if (playerColor.equals("WHITE") && game.getWhiteUsername() != null) {
             throw new DataAccessException("White side already taken");
         }
-        if (playerColor == ChessGame.TeamColor.BLACK && game.getBlackUsername() != null) {
+        if (playerColor.equals("BLACK") && game.getBlackUsername() != null) {
             throw new DataAccessException("Black side already taken");
         }
 
-        GameData newGame;
-        if (playerColor == ChessGame.TeamColor.WHITE) {
+        GameData newGame = null;
+
+        if (playerColor.equals("WHITE")) {
             newGame = new GameData(game.getGameID(), userName, game.getBlackUsername(), game.getGameName(), game.getGame());
-        } else {
+        } else if (playerColor.equals("BLACK")){
             newGame = new GameData(game.getGameID(), game.getWhiteUsername(), userName, game.getGameName(), game.getGame());
         }
 

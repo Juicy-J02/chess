@@ -3,7 +3,6 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import io.javalin.http.Context;
-import model.GameData;
 import service.*;
 
 public class GameHandler {
@@ -28,7 +27,7 @@ public class GameHandler {
             ctx.status(200).json(result);
 
         } catch (DataAccessException e) {
-            ctx.status(403).json(new Message(e.getMessage()));
+            ctx.status(401).json(new Message(e.getMessage()));
         }
     }
 
@@ -40,18 +39,17 @@ public class GameHandler {
                 return;
             }
 
-            GameData game = serializer.fromJson(ctx.body(), GameData.class);
-            if (game.getGameName() == null || game.getGameName().isEmpty()) {
+            CreateGameRequest createGameRequest = serializer.fromJson(ctx.body(), CreateGameRequest.class);
+            if (createGameRequest.gameName() == null || createGameRequest.gameName().isEmpty()) {
                 ctx.status(400).json(new Message("Error: game name required"));
                 return;
             }
 
-            CreateGameRequest createGameRequest = new CreateGameRequest(authToken, game.getGameName());
-            CreateGameResult result = gameService.createGame(createGameRequest);
+            CreateGameResult result = gameService.createGame(createGameRequest, authToken);
             ctx.status(200).json(result);
 
         } catch (DataAccessException e) {
-            ctx.status(403).json(new Message(e.getMessage()));
+            ctx.status(401).json(new Message(e.getMessage()));
         }
     }
 
@@ -63,14 +61,16 @@ public class GameHandler {
                 return;
             }
 
-            GameData game = serializer.fromJson(ctx.body(), GameData.class);
-            if (game.getGameID() == 0 || game.getGame() == null) {
+            JoinGameRequest joinGameRequest = serializer.fromJson(ctx.body(), JoinGameRequest.class);
+
+            if (joinGameRequest.gameID() == null || joinGameRequest.gameID() <= 0 ||
+                    joinGameRequest.playerColor() == null ||
+                    (!joinGameRequest.playerColor().equals("WHITE") && !joinGameRequest.playerColor().equals("BLACK"))) {
                 ctx.status(400).json(new Message("Error: bad request"));
                 return;
             }
 
-            JoinGameRequest joinRequest = new JoinGameRequest(authToken, game.getGame().getTeamTurn(), game.getGameID());
-            gameService.joinGame(joinRequest);
+            gameService.joinGame(joinGameRequest, authToken);
             ctx.status(200);
 
         } catch (DataAccessException e) {
@@ -79,6 +79,8 @@ public class GameHandler {
                 ctx.status(403).json(new Message(e.getMessage()));
             } else if (msg.contains("not found")) {
                 ctx.status(400).json(new Message(e.getMessage()));
+            } else if (msg.contains("no auth")) {
+                ctx.status(401).json(new Message(e.getMessage()));
             } else {
                 ctx.status(500).json(new Message(e.getMessage()));
             }
