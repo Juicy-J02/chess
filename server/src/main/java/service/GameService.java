@@ -4,21 +4,16 @@ import chess.ChessGame;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
-import dataaccess.UserDAO;
 import model.AuthData;
 import model.GameData;
-import model.UserData;
-
 import java.util.List;
 
 public class GameService {
 
-    private final UserDAO userDAO;
     private final AuthDAO authDAO;
     private final GameDAO gameDAO;
 
-    public GameService(UserDAO userDAO, AuthDAO authDAO, GameDAO gameDAO) {
-        this.userDAO = userDAO;
+    public GameService(AuthDAO authDAO, GameDAO gameDAO) {
         this.authDAO = authDAO;
         this.gameDAO = gameDAO;
     }
@@ -62,10 +57,10 @@ public class GameService {
         if (game == null) {
             throw new DataAccessException("Game not found");
         }
-        if (joinGameRequest.teamColor() == ChessGame.TeamColor.WHITE && game.getWhiteUsername() != null) {
+        if (ChessGame.TeamColor.valueOf(String.valueOf(joinGameRequest.teamColor())) == ChessGame.TeamColor.WHITE && game.getWhiteUsername() != null) {
             throw new DataAccessException("White is already taken");
         }
-        if (joinGameRequest.teamColor() == ChessGame.TeamColor.BLACK && game.getBlackUsername() != null) {
+        if (ChessGame.TeamColor.valueOf(String.valueOf(joinGameRequest.teamColor())) == ChessGame.TeamColor.BLACK && game.getBlackUsername() != null) {
             throw new DataAccessException("Black is already taken");
         }
 

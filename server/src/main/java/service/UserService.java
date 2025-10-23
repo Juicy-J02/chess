@@ -25,6 +25,7 @@ public class UserService {
 
         return new RegisterResult(user.getUsername(), authData.getAuthToken());
     }
+
     public LoginResult login(LoginRequest loginRequest) throws DataAccessException {
         UserData user = userDAO.getUserByUsername(loginRequest.username());
 
