@@ -11,18 +11,18 @@ public class AuthDataAccess implements AuthDAO {
 
     @Override
     public void createAuthData(AuthData authData) throws DataAccessException {
-        if (authDatas.containsKey(authData.getAuthToken())) {
+        if (authDatas.containsKey(authData.getUsername())) {
             throw new DataAccessException("AuthToken already exists");
         }
-        authDatas.put(authData.getAuthToken(), authData);
+        authDatas.put(authData.getUsername(), authData);
     }
 
     @Override
-    public void deleteAuthData(String authToken) throws DataAccessException {
-        if (!authDatas.containsKey(authToken)) {
+    public void deleteAuthData(String username) throws DataAccessException {
+        if (!authDatas.containsKey(username)) {
             throw new DataAccessException("No Auth Token to Delete");
         }
-        authDatas.remove(authToken);
+        authDatas.remove(username);
     }
 
     @Override
