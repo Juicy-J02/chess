@@ -55,7 +55,7 @@ public class UserHandler {
         try {
             String authToken = ctx.header("authorization");
             if (authToken == null) {
-                ctx.status(401).json(new Message("Error: unauthorized"));
+                ctx.status(403).json(new Message("Error: unauthorized"));
                 return;
             }
 
@@ -64,7 +64,7 @@ public class UserHandler {
             ctx.status(200);
 
         } catch (DataAccessException e) {
-            ctx.status(403).json(new Message(e.getMessage()));
+            ctx.status(401).json(new Message(e.getMessage()));
         }
     }
 

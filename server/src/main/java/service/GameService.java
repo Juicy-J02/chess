@@ -21,7 +21,7 @@ public class GameService {
     public GameListResult getGames(GameListRequest gameListRequest) throws DataAccessException {
         AuthData authData = authDAO.getAuthByToken(gameListRequest.authToken());
         if (authData == null) {
-            throw new DataAccessException("No Auth data");
+            throw new DataAccessException("Error: No Auth data");
         }
 
         List<GameData> games = gameDAO.getAllGames();
@@ -31,10 +31,10 @@ public class GameService {
     public CreateGameResult createGame(CreateGameRequest createGameRequest) throws DataAccessException {
         AuthData authData = authDAO.getAuthByToken(createGameRequest.authToken());
         if (authData == null) {
-            throw new DataAccessException("No Auth data");
+            throw new DataAccessException("Error: No Auth data");
         }
         if (createGameRequest.gameName() == null) {
-            throw new DataAccessException("Game name required");
+            throw new DataAccessException("Error: Game name required");
         }
 
         gameDAO.createGame(createGameRequest.gameName());
@@ -49,21 +49,21 @@ public class GameService {
 
         AuthData authData = authDAO.getAuthByToken(joinGameRequest.authToken());
         if (authData == null) {
-            throw new DataAccessException("No Auth data");
+            throw new DataAccessException("Error: No Auth data");
         }
 
         GameData game = gameDAO.getGame(joinGameRequest.gameID());
 
         if (game == null) {
-            throw new DataAccessException("Game not found");
+            throw new DataAccessException("Error: Game not found");
         }
         if (ChessGame.TeamColor.valueOf(String.valueOf(joinGameRequest.teamColor())) == ChessGame.TeamColor.WHITE && game.getWhiteUsername() != null) {
-            throw new DataAccessException("White is already taken");
+            throw new DataAccessException("Error: White is already taken");
         }
         if (ChessGame.TeamColor.valueOf(String.valueOf(joinGameRequest.teamColor())) == ChessGame.TeamColor.BLACK && game.getBlackUsername() != null) {
-            throw new DataAccessException("Black is already taken");
+            throw new DataAccessException("Error: Black is already taken");
         }
 
         gameDAO.joinGame(joinGameRequest.gameID(), authData.getUsername(), joinGameRequest.teamColor());
     }
-    }
+}

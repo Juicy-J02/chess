@@ -1,7 +1,9 @@
 package server;
 
+import com.google.gson.Gson;
 import dataaccess.*;
 import io.javalin.Javalin;
+import io.javalin.json.JavalinGson;
 import service.GameService;
 import service.UserService;
 
@@ -13,6 +15,7 @@ public class Server {
     private final AuthDAO authDataAccess;
 
     public Server() {
+
         userDataAccess = new UserDataAccess();
         gameDataAccess = new GameDataAccess();
         authDataAccess = new AuthDataAccess();
@@ -23,7 +26,10 @@ public class Server {
         UserHandler userHandler = new UserHandler(userService);
         GameHandler gameHandler = new GameHandler(gameService);
 
-        javalin = Javalin.create(config -> config.staticFiles.add("web"));
+        javalin = Javalin.create(config -> {
+            config.staticFiles.add("web");
+            config.jsonMapper(new JavalinGson());
+        });
 
         javalin.post("/user", userHandler::registerUser);
         javalin.post("/session", userHandler::loginUser);

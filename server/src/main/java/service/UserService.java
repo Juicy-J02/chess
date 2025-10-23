@@ -18,7 +18,7 @@ public class UserService {
 
     public RegisterResult register(RegisterRequest registerRequest) throws DataAccessException {
         if (userDAO.getUserByUsername(registerRequest.username()) != null) {
-            throw new DataAccessException("User already exists");
+            throw new DataAccessException("Error: User already exists");
         }
 
         UserData user = new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email());
@@ -34,7 +34,7 @@ public class UserService {
         UserData user = userDAO.getUserByUsername(loginRequest.username());
 
         if (user == null || !user.getPassword().equals(loginRequest.password())) {
-            throw new DataAccessException("Incorrect username or password");
+            throw new DataAccessException("Error: Incorrect username or password");
         }
 
         AuthData authData = new AuthData(loginRequest.username());
@@ -46,7 +46,7 @@ public class UserService {
     public void logout(LogoutRequest logoutRequest) throws DataAccessException {
         AuthData authData = authDAO.getAuthByToken(logoutRequest.authToken());
         if (authData == null) {
-            throw new DataAccessException("No Auth data");
+            throw new DataAccessException("Error: No Auth data");
         }
 
         authDAO.deleteAuthData(authData.getAuthToken());
