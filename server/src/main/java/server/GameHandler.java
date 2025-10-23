@@ -5,7 +5,6 @@ import dataaccess.DataAccessException;
 import io.javalin.http.Context;
 import model.GameData;
 import service.*;
-import java.io.IOException;
 
 public class GameHandler {
 
@@ -24,7 +23,7 @@ public class GameHandler {
         ctx.json(result);
     }
 
-    public void createGame(Context ctx) throws IOException, DataAccessException {
+    public void createGame(Context ctx) throws DataAccessException {
         String authToken = ctx.header("Authorization");
         GameData game = serializer.fromJson(ctx.body(), GameData.class);
 
@@ -34,7 +33,7 @@ public class GameHandler {
         ctx.json(result);
     }
 
-    public void joinGame(Context ctx) throws IOException, DataAccessException {
+    public void joinGame(Context ctx) throws DataAccessException {
         String authToken = ctx.header("Authorization");
         GameData game = serializer.fromJson(ctx.body(), GameData.class);
 

@@ -5,7 +5,6 @@ import dataaccess.DataAccessException;
 import io.javalin.http.Context;
 import model.UserData;
 import service.*;
-import java.io.IOException;
 
 public class UserHandler {
 
@@ -16,7 +15,7 @@ public class UserHandler {
         this.userService = userService;
     }
 
-    public void registerUser(Context ctx) throws DataAccessException, IOException {
+    public void registerUser(Context ctx) throws DataAccessException {
         UserData user = serializer.fromJson(ctx.body(), UserData.class);
         RegisterRequest registerRequest = new RegisterRequest(user.getUsername(), user.getPassword(), user.getEmail());
 
@@ -24,7 +23,7 @@ public class UserHandler {
         ctx.json(result);
     }
 
-    public void loginUser(Context ctx) throws DataAccessException, IOException {
+    public void loginUser(Context ctx) throws DataAccessException {
         UserData user = serializer.fromJson(ctx.body(), UserData.class);
         LoginRequest loginRequest = new LoginRequest(user.getUsername(), user.getPassword());
 
@@ -32,7 +31,7 @@ public class UserHandler {
         ctx.json(result);
     }
 
-    public void logoutUser(Context ctx) throws IOException, DataAccessException {
+    public void logoutUser(Context ctx) throws DataAccessException {
         String authToken = ctx.header("Authorization");
         LogoutRequest logoutRequest = new LogoutRequest(authToken);
 
