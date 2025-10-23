@@ -166,29 +166,12 @@ public class ChessGame {
             for (int j = 1; j < 9; j++) {
                 ChessPosition position = new ChessPosition(i, j);
                 ChessPiece piece = board.getPiece(position);
-                if (piece != null && escapeCheck(piece, position, teamColor)) {
+                if (piece != null && legalMove(piece, position, teamColor)) {
                     return false;
                 }
             }
         }
         return true;
-    }
-
-    public boolean escapeCheck(ChessPiece piece, ChessPosition position, TeamColor teamColor) {
-        for (ChessMove move : piece.pieceMoves(board, position)) {
-            ChessGame tempGame = new ChessGame();
-            tempGame.setBoard(board.copy());
-            tempGame.setTeamTurn(teamColor);
-            try {
-                tempGame.makeMove(move);
-                if (!tempGame.isInCheck(teamColor)) {
-                    return true;
-                }
-            } catch (InvalidMoveException e) {
-                continue;
-            }
-        }
-        return false;
     }
 
     /**
@@ -207,26 +190,41 @@ public class ChessGame {
             for (int j = 1; j < 9; j++) {
                 ChessPosition position = new ChessPosition(i, j);
                 ChessPiece piece = board.getPiece(position);
-                if (piece != null && piece.getTeamColor() == teamColor) {
-                    Collection<ChessMove> moves = piece.pieceMoves(board, position);
-                    if (moves != null) {
-                        for (ChessMove move : moves) {
-                            ChessGame tempGame = new ChessGame();
-                            tempGame.setBoard(board.copy());
-                            tempGame.setTeamTurn(teamColor);
-                            try {
-                                tempGame.makeMove(move);
-                                return false;
-                            } catch (InvalidMoveException e) {
-                                continue;
-                            }
-                        }
-                    }
+                if (teamPiece(piece, teamColor) && legalMove(piece, position, teamColor)) {
+                    return false;
                 }
             }
         }
         return true;
     }
+
+    private boolean teamPiece(ChessPiece piece, TeamColor teamColor) {
+        return piece != null && piece.getTeamColor() == teamColor;
+    }
+
+    private boolean legalMove(ChessPiece piece, ChessPosition position, TeamColor teamColor) {
+        if (piece == null) {
+            return false;
+        }
+
+        Collection<ChessMove> moves = piece.pieceMoves(board, position);
+
+        for (ChessMove move : moves) {
+            ChessGame tempGame = new ChessGame();
+            tempGame.setBoard(board.copy());
+            tempGame.setTeamTurn(teamColor);
+            try {
+                tempGame.makeMove(move);
+                if (!tempGame.isInCheck(teamColor)) {
+                    return true;
+                }
+            } catch (InvalidMoveException e) {
+                continue;
+            }
+        }
+        return false;
+    }
+
 
     /**
      * Sets this game's chessboard with a given board
