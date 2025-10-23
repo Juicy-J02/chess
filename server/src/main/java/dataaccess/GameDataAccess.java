@@ -35,7 +35,7 @@ public class GameDataAccess implements GameDAO {
     }
 
     @Override
-    public List<GameData> getAllGames() throws DataAccessException {
+    public List<GameData> getAllGames() {
         return new ArrayList<>(games.values());
     }
 
@@ -61,7 +61,7 @@ public class GameDataAccess implements GameDAO {
     }
 
     @Override
-    public void clearGames() throws DataAccessException {
+    public void clearGames() {
         games.clear();
         gameID = 1;
     }

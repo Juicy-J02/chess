@@ -7,6 +7,9 @@ import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DataAccessUnitTest {
@@ -148,5 +151,46 @@ public class DataAccessUnitTest {
         GameData found = gameDAO.getGame(gameID);
         assertEquals("john", found.getWhiteUsername());
         assertNull(found.getBlackUsername());
+    }
+
+    @Test
+    public void testGetAllGamesReturnsAll() throws DataAccessException {
+        gameDAO.createGame("game_one");
+        gameDAO.createGame("game_two");
+        gameDAO.createGame("game_three");
+
+        List<GameData> games = gameDAO.getAllGames();
+
+        assertEquals(3, games.size(), "Should return all created games");
+        assertTrue(
+                games.stream().anyMatch(g -> g.getGameName().equals("game_one")),
+                "Returned list should include 'game_one'"
+        );
+        assertTrue(
+                games.stream().anyMatch(g -> g.getGameName().equals("game_two")),
+                "Returned list should include 'game_two'"
+        );
+        assertTrue(
+                games.stream().anyMatch(g -> g.getGameName().equals("game_three")),
+                "Returned list should include 'game_three'"
+        );
+    }
+
+    @Test
+    public void testGetAllGamesWhenEmpty() throws DataAccessException {
+        List<GameData> games = gameDAO.getAllGames();
+        assertTrue(games.isEmpty(), "Should return an empty list when no games exist");
+    }
+
+    @Test
+    public void testGetAllGamesReturnsCopyNotReference() throws DataAccessException {
+        gameDAO.createGame("solo_game");
+        List<GameData> games = gameDAO.getAllGames();
+
+
+        games.clear();
+
+        List<GameData> gamesAgain = gameDAO.getAllGames();
+        assertEquals(1, gamesAgain.size(), "DAO internal list should not be affected by external modification");
     }
 }
