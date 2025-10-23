@@ -25,12 +25,8 @@ public class AuthDataAccess implements AuthDAO {
     }
 
     @Override
-    public AuthData getAuthByToken(String authToken) throws DataAccessException {
-        AuthData authData = authDatas.get(authToken);
-        if (authData == null) {
-            throw new DataAccessException("Auth token not found");
-        }
-        return authData;
+    public AuthData getAuthByToken(String authToken) {
+        return authDatas.get(authToken);
     }
 
     @Override

@@ -17,12 +17,12 @@ public class UserDataAccess implements UserDAO {
     }
 
     @Override
-    public UserData getUserByUsername(String username) throws DataAccessException {
+    public UserData getUserByUsername(String username) {
         return users.get(username);
     }
 
     @Override
-    public void clearUserData() throws DataAccessException {
+    public void clearUserData() {
         users.clear();
     }
 }

@@ -66,4 +66,4 @@ public class GameService {
 
         gameDAO.joinGame(joinGameRequest.gameID(), authData.getUsername(), joinGameRequest.teamColor());
     }
-}
+    }

@@ -15,31 +15,80 @@ public class GameHandler {
         this.gameService = gameService;
     }
 
-    public void listAllGames(Context ctx) throws DataAccessException {
-        String authToken = ctx.header("Authorization");
-        GameListRequest gameListRequest = new GameListRequest(authToken);
+    public void listAllGames(Context ctx) {
+        try {
+            String authToken = ctx.header("authorization");
+            if (authToken == null) {
+                ctx.status(401).json(new Message("Error: unauthorized"));
+                return;
+            }
 
-        GameListResult result = gameService.getGames(gameListRequest);
-        ctx.json(result);
+            GameListRequest gameListRequest = new GameListRequest(authToken);
+            GameListResult result = gameService.getGames(gameListRequest);
+            ctx.status(200).json(result);
+
+        } catch (DataAccessException e) {
+            ctx.status(403).json(new Message(e.getMessage()));
+        }
     }
 
-    public void createGame(Context ctx) throws DataAccessException {
-        String authToken = ctx.header("Authorization");
-        GameData game = serializer.fromJson(ctx.body(), GameData.class);
+    public void createGame(Context ctx) {
+        try {
+            String authToken = ctx.header("authorization");
+            if (authToken == null) {
+                ctx.status(401).json(new Message("Error: unauthorized"));
+                return;
+            }
 
-        CreateGameRequest createGameRequest = new CreateGameRequest(authToken, game.getGameName());
-        CreateGameResult result = gameService.createGame(createGameRequest);
+            GameData game = serializer.fromJson(ctx.body(), GameData.class);
+            if (game.getGameName() == null || game.getGameName().isEmpty()) {
+                ctx.status(400).json(new Message("Error: game name required"));
+                return;
+            }
 
-        ctx.json(result);
+            CreateGameRequest createGameRequest = new CreateGameRequest(authToken, game.getGameName());
+            CreateGameResult result = gameService.createGame(createGameRequest);
+            ctx.status(200).json(result);
+
+        } catch (DataAccessException e) {
+            ctx.status(403).json(new Message(e.getMessage()));
+        }
     }
 
-    public void joinGame(Context ctx) throws DataAccessException {
-        String authToken = ctx.header("Authorization");
-        GameData game = serializer.fromJson(ctx.body(), GameData.class);
+    public void joinGame(Context ctx) {
+        try {
+            String authToken = ctx.header("authorization");
+            if (authToken == null) {
+                ctx.status(401).json(new Message("Error: unauthorized"));
+                return;
+            }
 
-        JoinGameRequest joinRequest = new JoinGameRequest(authToken, game.getGame().getTeamTurn(), game.getGameID());
-        gameService.joinGame(joinRequest);
+            GameData game = serializer.fromJson(ctx.body(), GameData.class);
+            if (game.getGameID() == 0 || game.getGame() == null) {
+                ctx.status(400).json(new Message("Error: bad request"));
+                return;
+            }
 
-        ctx.status(200);
+            JoinGameRequest joinRequest = new JoinGameRequest(authToken, game.getGame().getTeamTurn(), game.getGameID());
+            gameService.joinGame(joinRequest);
+            ctx.status(200);
+
+        } catch (DataAccessException e) {
+            String msg = e.getMessage().toLowerCase();
+            if (msg.contains("already taken")) {
+                ctx.status(403).json(new Message(e.getMessage()));
+            } else if (msg.contains("not found")) {
+                ctx.status(400).json(new Message(e.getMessage()));
+            } else {
+                ctx.status(500).json(new Message(e.getMessage()));
+            }
+        }
+    }
+
+    private static class Message {
+        public final String message;
+        public Message(String message) {
+            this.message = message;
+        }
     }
 }

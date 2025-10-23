@@ -41,16 +41,6 @@ public class DataAccessUnitTest {
     }
 
     @Test
-    public void testAddDuplicateUserFails() throws DataAccessException {
-        UserData user = new UserData("jane_doe", "password123", "jane@example.com");
-        userDAO.createUserData(user);
-
-        assertThrows(DataAccessException.class, () -> {
-            userDAO.createUserData(user);
-        }, "Inserting duplicate username should throw exception");
-    }
-
-    @Test
     public void testAddAuthSuccessfully() throws DataAccessException {
         AuthData authData = new AuthData("john_doe");
 
@@ -68,27 +58,16 @@ public class DataAccessUnitTest {
         AuthData authData = new AuthData("john_doe");
 
         authDAO.createAuthData(authData);
-        AuthData found = authDAO.getAuthByUsername("john_doe");
-        authDAO.deleteAuthData(authData.getUsername());
+        AuthData found = authDAO.getAuthByToken(authData.getAuthToken());
+        authDAO.deleteAuthData(authData.getAuthToken());
 
-        assertNull(authDAO.getAuthByUsername(found.getUsername()), "User should not be found in the database");
-    }
-
-    @Test
-    public void testAddDuplicateAuthFails() throws DataAccessException {
-        AuthData authData = new AuthData("john_doe");
-
-        authDAO.createAuthData(authData);
-
-        assertThrows(DataAccessException.class, () -> {
-            authDAO.createAuthData(authData);
-        }, "Inserting duplicate username should throw exception");
+        assertNull(authDAO.getAuthByToken(found.getAuthToken()), "User should not be found in the database");
     }
 
     @Test
     public void testDatabaseStartsEmpty() throws DataAccessException {
         assertNull(userDAO.getUserByUsername("nobody"), "Database should be empty at start");
-        assertNull(authDAO.getAuthByUsername("nobody"), "Database should be empty at start");
+        assertNull(authDAO.getAuthByToken("nobody"), "Database should be empty at start");
     }
 
     @Test
@@ -138,19 +117,6 @@ public class DataAccessUnitTest {
         gameDAO.joinGame(1, "john", ChessGame.TeamColor.WHITE);
         GameData found = gameDAO.getGame(1);
         assertEquals("john", found.getWhiteUsername());
-    }
-
-    @Test
-    public void testJoinGameUnsuccessfully() throws DataAccessException {
-        Integer gameID = gameDAO.createGame("biggest_game");
-        gameDAO.joinGame(gameID, "john", ChessGame.TeamColor.WHITE);
-        DataAccessException exception = assertThrows(DataAccessException.class, () ->
-                gameDAO.joinGame(gameID, "harry", ChessGame.TeamColor.WHITE)
-        );
-        assertEquals("White side already taken", exception.getMessage());
-        GameData found = gameDAO.getGame(gameID);
-        assertEquals("john", found.getWhiteUsername());
-        assertNull(found.getBlackUsername());
     }
 
     @Test

@@ -14,10 +14,7 @@ public class GameDataAccess implements GameDAO {
     private int gameID = 1;
 
     @Override
-    public Integer createGame(String gameName) throws DataAccessException {
-        if (gameName == null || gameName.isBlank()) {
-            throw new DataAccessException("Game name cannot be empty");
-        }
+    public Integer createGame(String gameName) {
         int id = gameID++;
         GameData game = new GameData(id, null, null, gameName, new ChessGame());
         games.put(id, game);
@@ -26,12 +23,8 @@ public class GameDataAccess implements GameDAO {
     }
 
     @Override
-    public GameData getGame(int gameID) throws DataAccessException {
-        GameData game = games.get(gameID);
-        if (game == null) {
-            throw new DataAccessException("Game not found");
-        }
-        return game;
+    public GameData getGame(int gameID) {
+        return games.get(gameID);
     }
 
     @Override

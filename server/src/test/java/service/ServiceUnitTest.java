@@ -1,15 +1,10 @@
 package service;
 
-import chess.ChessGame;
 import dataaccess.*;
 import model.AuthData;
-import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ServiceUnitTest {
@@ -83,7 +78,7 @@ public class ServiceUnitTest {
 
         assertDoesNotThrow(() -> userService.logout(new LogoutRequest(reg.authToken())));
 
-        assertThrows(DataAccessException.class, () -> authDAO.getAuthByToken(reg.authToken()));
+        assertNull(authDAO.getAuthByToken(reg.authToken()));
     }
 
 
@@ -92,12 +87,6 @@ public class ServiceUnitTest {
         DataAccessException ex = assertThrows(DataAccessException.class, () -> {
             userService.logout(new LogoutRequest("invalid_token"));
         });
-        assertTrue(ex.getMessage().contains("Auth token not found"));
-    }
-
-    @Test
-    public void testGetGamesSuccess() throws DataAccessException {
-        AuthData authData = new AuthData("john");
-        List<GameData> game = List.of(new GameData(1, null, null, "chess1", new ChessGame()));
+        assertTrue(ex.getMessage().contains("No Auth data"));
     }
 }
