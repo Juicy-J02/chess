@@ -40,8 +40,7 @@ public class UserHandler {
                 return;
             }
 
-            LoginRequest loginRequest = new LoginRequest(loginrequest.username(), loginrequest.password());
-            LoginResult result = userService.login(loginRequest);
+            LoginResult result = userService.login(loginrequest);
             ctx.status(200).json(result);
 
         } catch (DataAccessException e) {

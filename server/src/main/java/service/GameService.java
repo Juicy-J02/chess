@@ -40,6 +40,9 @@ public class GameService {
         gameDAO.createGame(createGameRequest.gameName());
 
         List<GameData> games = gameDAO.getAllGames();
+        if (games.isEmpty()) {
+            throw new DataAccessException("Error: No games found");
+        }
         GameData game = games.getLast();
 
         return new CreateGameResult(game.getGameID());
