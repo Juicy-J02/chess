@@ -1,52 +1,16 @@
 package chess;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 public class Queen implements PieceMoveCalculator {
 
+    private static final int[][] directions = {
+            {-1, -1}, {1, 1}, {1, -1}, {-1, 1},
+            {-1, 0}, {1, 0}, {0, -1}, {0, 1}
+    };
+
     @Override
     public Collection<ChessMove> calculateMoves(ChessPiece piece, ChessBoard board, ChessPosition position) {
-        Collection<ChessMove> moves = new ArrayList<>();
-
-        directionalMove(piece, board, position, -1, -1, moves);
-        directionalMove(piece, board, position, 1, 1, moves);
-        directionalMove(piece, board, position, 1, -1, moves);
-        directionalMove(piece, board, position, -1, 1, moves);
-        directionalMove(piece, board, position, -1, 0, moves);
-        directionalMove(piece, board, position, 1, 0, moves);
-        directionalMove(piece, board, position, 0, -1, moves);
-        directionalMove(piece, board, position, 0, 1, moves);
-
-        return moves;
-    }
-
-    private void directionalMove(ChessPiece piece, ChessBoard board, ChessPosition position, int x, int y, Collection<ChessMove> moves) {
-
-        int row = position.getRow();
-        int col = position.getColumn();
-
-        row += x;
-        col += y;
-
-        while (true) {
-            ChessPosition move = new ChessPosition(row, col);
-
-            if (!board.validPosition(move)) {
-                break;
-            }
-
-            if (board.emptyPosition(move)) {
-                moves.add(new ChessMove(position, move, null));
-            } else if (board.isEnemy(move, piece)) {
-                moves.add(new ChessMove(position, move, null));
-                break;
-            } else {
-                break;
-            }
-
-            row += x;
-            col += y;
-        }
+        return DirectionalMove.generateSlidingDirectionalMoves(piece, board, position, directions);
     }
 }
