@@ -64,18 +64,18 @@ public class ChessGame {
         Collection<ChessMove> validMoves = new ArrayList<>();
 
         for (ChessMove move : moves) {
-            ChessBoard temp_board = board.copy();
-            temp_board.removePiece(startPosition);
+            ChessBoard tempBoard = board.copy();
+            tempBoard.removePiece(startPosition);
             if (move.getPromotionPiece() != null) {
-                temp_board.addPiece(move.getEndPosition(), new ChessPiece(turn, move.getPromotionPiece()));
+                tempBoard.addPiece(move.getEndPosition(), new ChessPiece(turn, move.getPromotionPiece()));
             } else {
-                temp_board.addPiece(move.getEndPosition(), piece);
+                tempBoard.addPiece(move.getEndPosition(), piece);
             }
-            ChessGame temp_game = new ChessGame();
-            temp_game.setBoard(temp_board);
-            temp_game.setTeamTurn(turn);
+            ChessGame tempGame = new ChessGame();
+            tempGame.setBoard(tempBoard);
+            tempGame.setTeamTurn(turn);
 
-            if (!temp_game.isInCheck(piece.getTeamColor())) {
+            if (!tempGame.isInCheck(piece.getTeamColor())) {
                 validMoves.add(move);
             }
         }
@@ -173,12 +173,12 @@ public class ChessGame {
                     Collection<ChessMove> moves = piece.pieceMoves(board, position);
                     if (moves != null) {
                         for (ChessMove move : moves) {
-                            ChessGame temp_game = new ChessGame();
-                            temp_game.setBoard(board.copy());
-                            temp_game.setTeamTurn(teamColor);
+                            ChessGame tempGame = new ChessGame();
+                            tempGame.setBoard(board.copy());
+                            tempGame.setTeamTurn(teamColor);
                             try {
-                                temp_game.makeMove(move);
-                                if (!temp_game.isInCheck(teamColor)) {
+                                tempGame.makeMove(move);
+                                if (!tempGame.isInCheck(teamColor)) {
                                     return false;
                                 }
                             } catch (InvalidMoveException e) {
@@ -214,11 +214,11 @@ public class ChessGame {
                     Collection<ChessMove> moves = piece.pieceMoves(board, position);
                     if (moves != null) {
                         for (ChessMove move : moves) {
-                            ChessGame temp_game = new ChessGame();
-                            temp_game.setBoard(board.copy());
-                            temp_game.setTeamTurn(teamColor);
+                            ChessGame tempGame = new ChessGame();
+                            tempGame.setBoard(board.copy());
+                            tempGame.setTeamTurn(teamColor);
                             try {
-                                temp_game.makeMove(move);
+                                tempGame.makeMove(move);
                                 return false;
                             } catch (InvalidMoveException e) {
                                 continue;

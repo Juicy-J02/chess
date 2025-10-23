@@ -101,16 +101,16 @@ public class ChessBoard {
     }
 
     public ChessBoard copy() {
-        ChessBoard board_copy = new ChessBoard();
+        ChessBoard boardCopy = new ChessBoard();
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 ChessPiece piece = spaces[i][j];
                 if (piece != null) {
-                    board_copy.spaces[i][j] = new ChessPiece(piece.getTeamColor(), piece.getPieceType());
+                    boardCopy.spaces[i][j] = new ChessPiece(piece.getTeamColor(), piece.getPieceType());
                 }
             }
         }
-        return board_copy;
+        return boardCopy;
     }
 
     @Override
