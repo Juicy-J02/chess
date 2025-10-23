@@ -181,7 +181,8 @@ public class ChessGame {
                                 if (!temp_game.isInCheck(teamColor)) {
                                     return false;
                                 }
-                            } catch (InvalidMoveException _) {
+                            } catch (InvalidMoveException e) {
+                                continue;
                             }
                         }
                     }
@@ -219,7 +220,8 @@ public class ChessGame {
                             try {
                                 temp_game.makeMove(move);
                                 return false;
-                            } catch (InvalidMoveException _) {
+                            } catch (InvalidMoveException e) {
+                                continue;
                             }
                         }
                     }
