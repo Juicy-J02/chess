@@ -13,7 +13,7 @@ public class Server {
 
     public Server() {
 
-        UserDAO userDataAccess = new UserDataAccess();
+        UserDAO userDataAccess = new UserDataAccessSQL();
         GameDAO gameDataAccess = new GameDataAccess();
         AuthDAO authDataAccess = new AuthDataAccess();
 
