@@ -7,10 +7,10 @@ import java.sql.*;
 
 public class UserDataAccessSQL implements UserDAO {
 
-    public void MySqlUserDataAccess() throws DataAccessException {
+    public UserDataAccessSQL() {
         try {
             DatabaseManager.createDatabase();
-            Connection connection = DatabaseManager.getConnection(); {
+            Connection connection = DatabaseManager.getConnection();
                 for (String statement : createStatements) {
                     try {
                         var preparedStatement = connection.prepareStatement(statement);
@@ -19,9 +19,8 @@ public class UserDataAccessSQL implements UserDAO {
                         throw new RuntimeException(e.getMessage());
                     }
                 }
-            }
         } catch (DataAccessException e) {
-            throw new DataAccessException(e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
 
@@ -49,7 +48,7 @@ public class UserDataAccessSQL implements UserDAO {
         try {
             Connection connection = DatabaseManager.getConnection();
             try {
-                var preparedStatement = connection.prepareStatement("SELECT username, password, email FROM user WHERE username=?");
+                var preparedStatement = connection.prepareStatement("SELECT username, password, email FROM users WHERE username=?");
                 preparedStatement.setString(1, username);
                 ResultSet resultSet = preparedStatement.executeQuery();
                 if (resultSet.next()) {
