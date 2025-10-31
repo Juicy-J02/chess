@@ -4,7 +4,6 @@ import dataaccess.*;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,13 +27,6 @@ public class DataAccessUnitTest {
         gameDAO.clearGames();
     }
 
-    @AfterAll
-    public static void clear() throws DataAccessException {
-        userDAO.clearUserData();
-        authDAO.clearAuthData();
-        gameDAO.clearGames();
-    }
-
     @Test
     public void testAddUserSuccessfully() throws DataAccessException {
         UserData user = new UserData("john_doe", "password123", "john@example.com");
@@ -45,6 +37,16 @@ public class DataAccessUnitTest {
         assertNotNull(found, "User should be found in the database");
         assertEquals("john_doe", found.getUsername());
         assertEquals("john@example.com", found.getEmail());
+    }
+
+    @Test
+    public void testAddUserUnsuccessfully() throws DataAccessException {
+        UserData user = new UserData("john_doe", "password123", "john@example.com");
+        userDAO.createUserData(user);
+
+        UserData duplicateUser = new UserData("john_doe", "newpass456", "john2@example.com");
+        assertThrows(DataAccessException.class, () -> userDAO.createUserData(duplicateUser),
+                "Should throw exception when trying to add duplicate username");
     }
 
     @Test
@@ -61,6 +63,16 @@ public class DataAccessUnitTest {
     }
 
     @Test
+    public void testAddAuthUnsuccessfully() throws DataAccessException {
+        AuthData authData = new AuthData("john_doe");
+        authDAO.createAuthData(authData);
+
+        AuthData duplicateAuth = new AuthData("john_doe");
+        assertThrows(DataAccessException.class, () -> authDAO.createAuthData(duplicateAuth),
+                "Should throw exception when trying to add duplicate username");
+    }
+
+    @Test
     public void testDeleteAuthSuccessfully() throws DataAccessException {
         AuthData authData = new AuthData("john_doe");
 
@@ -72,10 +84,20 @@ public class DataAccessUnitTest {
     }
 
     @Test
+    public void testDeleteAuthUnsuccessfully() throws DataAccessException {
+        String token = "fake_token";
+
+        authDAO.deleteAuthData(token);
+
+        assertNull(authDAO.getAuthByToken(token), "Nonexistent auth token should not be found in the database");
+    }
+
+    @Test
     public void testDatabaseStartsEmpty() throws DataAccessException {
         assertNull(userDAO.getUserByUsername("nobody"), "Database should be empty at start");
         assertNull(authDAO.getAuthByToken("nobody"), "Database should be empty at start");
     }
+
 
     @Test
     public void clearUserDatabase() throws DataAccessException {
@@ -107,6 +129,19 @@ public class DataAccessUnitTest {
     }
 
     @Test
+    public void testAddGameUnsuccessfully() throws DataAccessException {
+        gameDAO.createGame("biggest_game");
+
+        assertThrows(DataAccessException.class, () -> gameDAO.createGame("biggest_game"),
+                "Should throw exception when adding duplicate game name");
+
+
+        List<GameData> games = gameDAO.getAllGames();
+        assertEquals(1, games.size(), "Only one game entry should exist");
+    }
+
+
+    @Test
     public void testGetGameSuccessfully() throws DataAccessException {
         Integer gameID = gameDAO.createGame("biggest_game");
         GameData found = gameDAO.getGame(gameID);
@@ -119,11 +154,27 @@ public class DataAccessUnitTest {
     }
 
     @Test
+    public void testGetGameUnsuccessfully() throws DataAccessException {
+        GameData found = gameDAO.getGame(999999);
+
+        assertNull(found, "Expected null when fetching a non-existent game");
+    }
+
+    @Test
     public void testJoinGameSuccessfully() throws DataAccessException {
         gameDAO.createGame("biggest_game");
         gameDAO.joinGame(1, "john", "WHITE");
         GameData found = gameDAO.getGame(1);
         assertEquals("john", found.getWhiteUsername());
+    }
+
+    @Test
+    public void testJoinGameUnsuccessfully() throws DataAccessException {
+        gameDAO.createGame("biggest_game");
+        gameDAO.joinGame(1, "john", "WHITE");
+        assertThrows(DataAccessException.class, () -> {
+            gameDAO.joinGame(1, "mary", "WHITE");
+        }, "Should throw exception when joining a color that's already taken");
     }
 
     @Test

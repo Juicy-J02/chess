@@ -37,14 +37,22 @@ public class GameService {
             throw new DataAccessException("Error: Game name required");
         }
 
+        GameListResult games = getGames(new GameListRequest(authToken));
+
+        for (GameData game : games.games()) {
+            if (createGameRequest.gameName().equals(game.getGameName())) {
+                throw new DataAccessException("Error: Game already exists");
+            }
+        }
+
         gameDAO.createGame(createGameRequest.gameName());
 
-        List<GameData> games = gameDAO.getAllGames();
-        if (games.isEmpty()) {
-            throw new DataAccessException("Error: No games found");
+        List<GameData>  updatedGames = gameDAO.getAllGames();
+        if (updatedGames.isEmpty()) {
+            throw new DataAccessException("Error: Game creation failed");
         }
-        GameData game = games.getLast();
 
+        GameData game = updatedGames.getLast();
         return new CreateGameResult(game.getGameID());
     }
 

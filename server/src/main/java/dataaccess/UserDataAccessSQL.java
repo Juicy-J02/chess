@@ -24,17 +24,13 @@ public class UserDataAccessSQL extends SQLDataAccessBase implements UserDAO {
     public void createUserData(UserData user) throws DataAccessException {
         try {
             Connection connection = DatabaseManager.getConnection();
-            try {
-                var preparedStatement = connection.prepareStatement("INSERT INTO users (username, password, email) VALUES (?, ?, ?)");
-                preparedStatement.setString(1, user.getUsername());
-                String hashedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
-                preparedStatement.setString(2, hashedPassword);
-                preparedStatement.setString(3, user.getEmail());
-                preparedStatement.executeUpdate();
-            } catch (SQLException e) {
-                throw new RuntimeException(e.getMessage());
-            }
-        } catch (DataAccessException e) {
+            var preparedStatement = connection.prepareStatement("INSERT INTO users (username, password, email) VALUES (?, ?, ?)");
+            preparedStatement.setString(1, user.getUsername());
+            String hashedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
+            preparedStatement.setString(2, hashedPassword);
+            preparedStatement.setString(3, user.getEmail());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
             throw new DataAccessException("Data Access Error:" + e.getMessage());
         }
     }
@@ -43,36 +39,28 @@ public class UserDataAccessSQL extends SQLDataAccessBase implements UserDAO {
     public UserData getUserByUsername(String username) throws DataAccessException {
         try {
             Connection connection = DatabaseManager.getConnection();
-            try {
-                var preparedStatement = connection.prepareStatement("SELECT username, password, email FROM users WHERE username=?");
-                preparedStatement.setString(1, username);
-                ResultSet resultSet = preparedStatement.executeQuery();
-                if (resultSet.next()) {
-                    var user = resultSet.getString("username");
-                    var password = resultSet.getString("password");
-                    var email = resultSet.getString("email");
-                    return new UserData(user, password, email);
-                }
-            } catch (SQLException e) {
-                throw new RuntimeException(e.getMessage());
+            var preparedStatement = connection.prepareStatement("SELECT username, password, email FROM users WHERE username=?");
+            preparedStatement.setString(1, username);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                var user = resultSet.getString("username");
+                var password = resultSet.getString("password");
+                var email = resultSet.getString("email");
+                return new UserData(user, password, email);
             }
-            return null;
-        } catch (DataAccessException e) {
+        } catch (SQLException e) {
             throw new DataAccessException("Data Access Error:" + e.getMessage());
         }
+        return null;
     }
 
     @Override
     public void clearUserData() throws DataAccessException {
         try {
             Connection connection = DatabaseManager.getConnection();
-            try {
-                var preparedStatement = connection.prepareStatement("TRUNCATE users");
-                preparedStatement.executeUpdate();
-            } catch (SQLException e) {
-                throw new RuntimeException(e.getMessage());
-            }
-        } catch (DataAccessException e) {
+            var preparedStatement = connection.prepareStatement("TRUNCATE users");
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
             throw new DataAccessException("Data Access Error:" + e.getMessage());
         }
     }

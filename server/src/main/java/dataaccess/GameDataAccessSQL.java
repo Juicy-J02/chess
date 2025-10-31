@@ -19,7 +19,7 @@ public class GameDataAccessSQL extends SQLDataAccessBase implements GameDAO {
               `gameId` int NOT NULL AUTO_INCREMENT,
               `whiteUsername` varchar(256),
               `blackUsername` varchar(256),
-              `gameName` varchar(256) NOT NULL,
+              `gameName` varchar(256) NOT NULL UNIQUE,
               `chessGame` TEXT,
               PRIMARY KEY (`gameId`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
@@ -29,24 +29,21 @@ public class GameDataAccessSQL extends SQLDataAccessBase implements GameDAO {
 
     @Override
     public Integer createGame(String gameName) throws DataAccessException {
+        Connection connection = DatabaseManager.getConnection();
         try {
-            Connection connection = DatabaseManager.getConnection();
-            try {
-                var preparedStatement = connection.prepareStatement(
-                        "INSERT INTO games (whiteUsername, blackUsername, gameName, chessGame) VALUES (?, ?, ?, ?)"
-                );
+            var preparedStatement = connection.prepareStatement(
+                    "INSERT INTO games (whiteUsername, blackUsername, gameName, chessGame) VALUES (?, ?, ?, ?)"
+            );
 
-                String gameJson = new Gson().toJson(new ChessGame());
+            String gameJson = new Gson().toJson(new ChessGame());
 
-                preparedStatement.setString(1, null);
-                preparedStatement.setString(2, null);
-                preparedStatement.setString(3, gameName);
-                preparedStatement.setString(4, gameJson);
-                return preparedStatement.executeUpdate();
-            } catch (SQLException e) {
-                throw new RuntimeException(e.getMessage());
-            }
-        } catch (DataAccessException e) {
+            preparedStatement.setString(1, null);
+            preparedStatement.setString(2, null);
+            preparedStatement.setString(3, gameName);
+            preparedStatement.setString(4, gameJson);
+            return preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
             throw new DataAccessException("Data Access Error:" + e.getMessage());
         }
     }
@@ -55,22 +52,18 @@ public class GameDataAccessSQL extends SQLDataAccessBase implements GameDAO {
     public GameData getGame(int gameId) throws DataAccessException {
         try {
             Connection connection = DatabaseManager.getConnection();
-            try {
-                var preparedStatement = connection.prepareStatement(
-                        "SELECT gameId, whiteUsername, blackUsername, gameName, chessGame FROM games WHERE gameId=?"
-                );
-                preparedStatement.setInt(1, gameId);
-                ResultSet resultSet = preparedStatement.executeQuery();
-                if (resultSet.next()) {
-                    return parseGame(resultSet);
-                }
-            } catch (SQLException e) {
-                throw new RuntimeException(e.getMessage());
+            var preparedStatement = connection.prepareStatement(
+                    "SELECT gameId, whiteUsername, blackUsername, gameName, chessGame FROM games WHERE gameId=?"
+            );
+            preparedStatement.setInt(1, gameId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return parseGame(resultSet);
             }
-            return null;
-        } catch (DataAccessException e) {
+        } catch (SQLException e) {
             throw new DataAccessException("Data Access Error:" + e.getMessage());
         }
+        return null;
     }
 
     @Override
@@ -79,20 +72,16 @@ public class GameDataAccessSQL extends SQLDataAccessBase implements GameDAO {
 
         try {
             Connection connection = DatabaseManager.getConnection();
-            try {
-                var preparedStatement = connection.prepareStatement("SELECT gameId, whiteUsername, blackUsername, gameName, chessGame FROM games");
-                ResultSet resultSet = preparedStatement.executeQuery();
-                while (resultSet.next()) {
-                    GameData game = parseGame(resultSet);
-                    games.add(game);
-                }
-            } catch (SQLException e) {
-                throw new RuntimeException(e.getMessage());
+            var preparedStatement = connection.prepareStatement("SELECT gameId, whiteUsername, blackUsername, gameName, chessGame FROM games");
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                GameData game = parseGame(resultSet);
+                games.add(game);
             }
-            return games;
-        } catch (DataAccessException e) {
+        } catch (SQLException e) {
             throw new DataAccessException("Data Access Error:" + e.getMessage());
         }
+        return games;
     }
 
     @Override
@@ -107,16 +96,12 @@ public class GameDataAccessSQL extends SQLDataAccessBase implements GameDAO {
 
             try {
                 Connection connection = DatabaseManager.getConnection();
-                try {
-                    var preparedStatement = connection.prepareStatement("UPDATE games SET whiteUsername=?, chessGame=? WHERE gameId=?");
-                    preparedStatement.setString(1, userName);
-                    preparedStatement.setString(2, gameJson);
-                    preparedStatement.setInt(3, gameId);
-                    preparedStatement.executeUpdate();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e.getMessage());
-                }
-            } catch (DataAccessException e) {
+                var preparedStatement = connection.prepareStatement("UPDATE games SET whiteUsername=?, chessGame=? WHERE gameId=?");
+                preparedStatement.setString(1, userName);
+                preparedStatement.setString(2, gameJson);
+                preparedStatement.setInt(3, gameId);
+                preparedStatement.executeUpdate();
+            } catch (SQLException e) {
                 throw new DataAccessException("Data Access Error:" + e.getMessage());
             }
 
@@ -126,16 +111,12 @@ public class GameDataAccessSQL extends SQLDataAccessBase implements GameDAO {
 
             try {
                 Connection connection = DatabaseManager.getConnection();
-                try {
-                    var preparedStatement = connection.prepareStatement("UPDATE games SET blackUsername=?, chessGame=? WHERE gameId=?");
-                    preparedStatement.setString(1, userName);
-                    preparedStatement.setString(2, gameJson);
-                    preparedStatement.setInt(3, gameId);
-                    preparedStatement.executeUpdate();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e.getMessage());
-                }
-            } catch (DataAccessException e) {
+                var preparedStatement = connection.prepareStatement("UPDATE games SET blackUsername=?, chessGame=? WHERE gameId=?");
+                preparedStatement.setString(1, userName);
+                preparedStatement.setString(2, gameJson);
+                preparedStatement.setInt(3, gameId);
+                preparedStatement.executeUpdate();
+            } catch (SQLException e) {
                 throw new DataAccessException("Data Access Error:" + e.getMessage());
             }
         }
@@ -145,13 +126,9 @@ public class GameDataAccessSQL extends SQLDataAccessBase implements GameDAO {
     public void clearGames() throws DataAccessException {
         try {
             Connection connection = DatabaseManager.getConnection();
-            try {
-                var preparedStatement = connection.prepareStatement("TRUNCATE games");
-                preparedStatement.executeUpdate();
-            } catch (SQLException e) {
-                throw new RuntimeException(e.getMessage());
-            }
-        } catch (DataAccessException e) {
+            var preparedStatement = connection.prepareStatement("TRUNCATE games");
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
             throw new DataAccessException("Data Access Error:" + e.getMessage());
         }
     }
