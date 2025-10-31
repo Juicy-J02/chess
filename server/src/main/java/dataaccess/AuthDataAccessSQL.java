@@ -1,4 +1,128 @@
 package dataaccess;
 
-public class AuthDataAccessSQL {
+import model.AuthData;
+import org.mindrot.jbcrypt.BCrypt;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class AuthDataAccessSQL implements AuthDAO {
+
+    public AuthDataAccessSQL() {
+        try {
+            DatabaseManager.createDatabase();
+            Connection connection = DatabaseManager.getConnection();
+            for (String statement : createStatements) {
+                try {
+                    var preparedStatement = connection.prepareStatement(statement);
+                    preparedStatement.executeUpdate();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e.getMessage());
+                }
+            }
+        } catch (DataAccessException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    @Override
+    public void createAuthData(AuthData authData) throws DataAccessException {
+        try {
+            Connection connection = DatabaseManager.getConnection();
+            try {
+                var preparedStatement = connection.prepareStatement("INSERT INTO authDatas (authToken, username) VALUES (?, ?)");
+                preparedStatement.setString(1, authData.getAuthToken());
+                preparedStatement.setString(2, authData.getUsername());
+                preparedStatement.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        } catch (DataAccessException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteAuthData(String authToken) throws DataAccessException {
+        try {
+            Connection connection = DatabaseManager.getConnection();
+            try {
+                var preparedStatement = connection.prepareStatement("DELETE FROM authDatas WHERE authToken=?");
+                preparedStatement.setString(1, authToken);
+                preparedStatement.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        } catch (DataAccessException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    @Override
+    public AuthData getAuthByToken(String authToken) throws DataAccessException {
+        try {
+            Connection connection = DatabaseManager.getConnection();
+            try {
+                var preparedStatement = connection.prepareStatement("SELECT authToken, username FROM authDatas WHERE authToken=?");
+                preparedStatement.setString(1, authToken);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    var username = resultSet.getString("username");
+                    return new AuthData(username);
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        } catch (DataAccessException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+        return null;
+    }
+
+    @Override
+    public AuthData getAuthByUsername(String username) throws DataAccessException {
+        try {
+            Connection connection = DatabaseManager.getConnection();
+            try {
+                var preparedStatement = connection.prepareStatement("SELECT authToken, username FROM authDatas WHERE username=?");
+                preparedStatement.setString(1, username);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    var user = resultSet.getString("username");
+                    return new AuthData(user);
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        } catch (DataAccessException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+        return null;
+    }
+
+    @Override
+    public void clearAuthData() throws DataAccessException {
+        try {
+            Connection connection = DatabaseManager.getConnection();
+            try {
+                var preparedStatement = connection.prepareStatement("TRUNCATE authDatas");
+                preparedStatement.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        } catch (DataAccessException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    private final String[] createStatements = {
+            """
+            CREATE TABLE IF NOT EXISTS  authDatas (
+              `authToken` varchar(256) NOT NULL,
+              `username` varchar(256) NOT NULL,
+              PRIMARY KEY (`authToken`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            """
+    };
 }

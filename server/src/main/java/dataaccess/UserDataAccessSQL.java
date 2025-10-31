@@ -11,14 +11,14 @@ public class UserDataAccessSQL implements UserDAO {
         try {
             DatabaseManager.createDatabase();
             Connection connection = DatabaseManager.getConnection();
-                for (String statement : createStatements) {
-                    try {
-                        var preparedStatement = connection.prepareStatement(statement);
-                        preparedStatement.executeUpdate();
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e.getMessage());
-                    }
+            for (String statement : createStatements) {
+                try {
+                    var preparedStatement = connection.prepareStatement(statement);
+                    preparedStatement.executeUpdate();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e.getMessage());
                 }
+            }
         } catch (DataAccessException e) {
             System.err.println(e.getMessage());
         }
