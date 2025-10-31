@@ -47,7 +47,7 @@ public class GameDataAccess implements GameDAO {
 
         if (playerColor.equals("WHITE")) {
             newGame = new GameData(game.getGameID(), userName, game.getBlackUsername(), game.getGameName(), game.getGame());
-        } else if (playerColor.equals("BLACK")){
+        } else if (playerColor.equals("BLACK")) {
             newGame = new GameData(game.getGameID(), game.getWhiteUsername(), userName, game.getGameName(), game.getGame());
         }
 

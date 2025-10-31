@@ -118,7 +118,7 @@ public class AuthDataAccessSQL implements AuthDAO {
 
     private final String[] createStatements = {
             """
-            CREATE TABLE IF NOT EXISTS  authDatas (
+            CREATE TABLE IF NOT EXISTS authDatas (
               `authToken` varchar(256) NOT NULL,
               `username` varchar(256) NOT NULL,
               PRIMARY KEY (`authToken`)

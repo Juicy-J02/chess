@@ -23,7 +23,7 @@ public class DataAccessSQLUnitTest {
         userDAO.clearUserData();
         authDAO = new AuthDataAccessSQL();
         authDAO.clearAuthData();
-        gameDAO = new GameDataAccess();
+        gameDAO = new GameDataAccessSQL();
         gameDAO.clearGames();
     }
 

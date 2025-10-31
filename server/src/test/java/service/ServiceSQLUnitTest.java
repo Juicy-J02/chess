@@ -21,7 +21,7 @@ public class ServiceSQLUnitTest {
     public void setup() throws DataAccessException {
         userDAO = new UserDataAccessSQL();
         authDAO = new AuthDataAccessSQL();
-        gameDAO = new GameDataAccess();
+        gameDAO = new GameDataAccessSQL();
 
         userDAO.clearUserData();
         authDAO.clearAuthData();
@@ -53,7 +53,7 @@ public class ServiceSQLUnitTest {
         RegisterRequest request = new RegisterRequest("john", "password123", "john@email.com");
         userService.register(request);
 
-        DataAccessException exception = assertThrows(DataAccessException.class, () -> {
+        DataAccessException exception = assertThrows(DataAccessException.class, () ->   {
             userService.register(request);
         });
         assertTrue(exception.getMessage().contains("User already exists"));
