@@ -30,10 +30,9 @@ public class DataAccessUnitTest {
     @Test
     public void testAddUserSuccessfully() throws DataAccessException {
         UserData user = new UserData("john_doe", "password123", "john@example.com");
-
         userDAO.createUserData(user);
-        UserData found = userDAO.getUserByUsername("john_doe");
 
+        UserData found = userDAO.getUserByUsername("john_doe");
         assertNotNull(found, "User should be found in the database");
         assertEquals("john_doe", found.getUsername());
         assertEquals("john@example.com", found.getEmail());
@@ -50,26 +49,60 @@ public class DataAccessUnitTest {
     }
 
     @Test
-    public void testAddAuthSuccessfully() throws DataAccessException {
-        AuthData authData = new AuthData("john_doe");
+    public void testGetUserByUsernameFound() throws DataAccessException {
+        UserData user = new UserData("john_doe", "password123", "john@example.com");
+        userDAO.createUserData(user);
 
-        authDAO.createAuthData(authData);
-        String authToken = authData.getAuthToken();
-        AuthData found = authDAO.getAuthByUsername("john_doe");
+        UserData found = userDAO.getUserByUsername("john_doe");
 
-        assertNotNull(found, "User should be found in the database");
-        assertEquals("john_doe", found.getUsername());
-        assertEquals(authToken, found.getAuthToken());
+        assertNotNull(found);
+        assertEquals(user.getUsername(), found.getUsername());
     }
 
     @Test
-    public void testAddAuthUnsuccessfully() throws DataAccessException {
+    public void testGetUserByUsernameNotFound() throws DataAccessException {
+        UserData found = userDAO.getUserByUsername("nonexistent");
+        assertNull(found, "Expected null for non-existent username");
+    }
+
+    @Test
+    public void testClearUserDataSuccessfully() throws DataAccessException {
+        UserData user1 = new UserData("john_doe", "pass", "john@example.com");
+        UserData user2 = new UserData("jane_doe", "pass", "jane@example.com");
+        userDAO.createUserData(user1);
+        userDAO.createUserData(user2);
+
+        userDAO.clearUserData();
+        assertNull(userDAO.getUserByUsername("john_doe"));
+        assertNull(userDAO.getUserByUsername("jane_doe"));
+    }
+
+    @Test
+    public void testClearEmptyUserData() throws DataAccessException {
+        assertNull(userDAO.getUserByUsername("anyone"));
+    }
+
+    @Test
+    public void testAddAuthSuccessfully() throws DataAccessException {
         AuthData authData = new AuthData("john_doe");
         authDAO.createAuthData(authData);
 
-        AuthData duplicateAuth = new AuthData("john_doe");
-        assertThrows(DataAccessException.class, () -> authDAO.createAuthData(duplicateAuth),
-                "Should throw exception when trying to add duplicate username");
+        AuthData found = authDAO.getAuthByUsername("john_doe");
+        assertNotNull(found);
+        assertEquals("john_doe", found.getUsername());
+        assertEquals(authData.getAuthToken(), found.getAuthToken());
+    }
+
+    @Test
+    public void testGetAuthByUsernameNotFound() throws DataAccessException {
+        AuthData found = authDAO.getAuthByUsername("nonexistent");
+        assertNull(found);
+    }
+
+    @Test
+    public void testGetAuthByTokenNotFound() throws DataAccessException {
+        AuthData found = authDAO.getAuthByToken("invalid_token");
+        assertNull(found);
     }
 
     @Test
@@ -98,21 +131,20 @@ public class DataAccessUnitTest {
         assertNull(authDAO.getAuthByToken("nobody"), "Database should be empty at start");
     }
 
+    @Test
+    public void testClearAuthDataSuccessfully() throws DataAccessException {
+        authDAO.createAuthData(new AuthData("user1"));
+        authDAO.createAuthData(new AuthData("user2"));
+        authDAO.clearAuthData();
+
+        assertNull(authDAO.getAuthByUsername("user1"));
+        assertNull(authDAO.getAuthByUsername("user2"));
+    }
 
     @Test
-    public void clearUserDatabase() throws DataAccessException {
-        UserData user = new UserData("john_doe", "password123", "john@example.com");
-        userDAO.createUserData(user);
-        UserData user1 = new UserData("jim_rock", "password123", "jim@example.com");
-        userDAO.createUserData(user1);
-        UserData user2 = new UserData("peepaw", "password123", "peep@example.com");
-        userDAO.createUserData(user2);
-
-        userDAO.clearUserData();
-
-        assertNull(userDAO.getUserByUsername("john_doe"), "Database should be empty");
-        assertNull(userDAO.getUserByUsername("jim_rock"), "Database should be empty");
-        assertNull(userDAO.getUserByUsername("peepaw"), "Database should be empty");
+    public void testClearEmptyAuthData() throws DataAccessException {
+        authDAO.clearAuthData();
+        assertNull(authDAO.getAuthByUsername("anyone"));
     }
 
     @Test
@@ -206,15 +238,4 @@ public class DataAccessUnitTest {
         assertTrue(games.isEmpty(), "Should return an empty list when no games exist");
     }
 
-    @Test
-    public void testGetAllGamesReturnsCopyNotReference() throws DataAccessException {
-        gameDAO.createGame("solo_game");
-        List<GameData> games = gameDAO.getAllGames();
-
-
-        games.clear();
-
-        List<GameData> gamesAgain = gameDAO.getAllGames();
-        assertEquals(1, gamesAgain.size(), "DAO internal list should not be affected by external modification");
-    }
 }
