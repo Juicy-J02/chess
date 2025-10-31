@@ -76,8 +76,9 @@ public class AuthDataAccessSQL implements AuthDAO {
                 preparedStatement.setString(1, authToken);
                 ResultSet resultSet = preparedStatement.executeQuery();
                 if (resultSet.next()) {
+                    var auth = resultSet.getString("authToken");
                     var username = resultSet.getString("username");
-                    return new AuthData(authToken, username);
+                    return new AuthData(auth, username);
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e.getMessage());
@@ -104,10 +105,10 @@ public class AuthDataAccessSQL implements AuthDAO {
             } catch (SQLException e) {
                 throw new RuntimeException(e.getMessage());
             }
+            return null;
         } catch (DataAccessException e) {
             throw new DataAccessException("Data Access Error:" + e.getMessage());
         }
-        return null;
     }
 
     @Override

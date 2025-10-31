@@ -112,14 +112,7 @@ public class GameDataAccessSQL implements GameDAO {
     @Override
     public void joinGame(int gameId, String userName, String playerColor) throws DataAccessException {
         GameData game = getGame(gameId);
-
-        if (playerColor.equals("WHITE") && game.getWhiteUsername() != null) {
-            throw new DataAccessException("White side already taken");
-        }
-        if (playerColor.equals("BLACK") && game.getBlackUsername() != null) {
-            throw new DataAccessException("Black side already taken");
-        }
-
+        takenSideError(playerColor, game);
         GameData newGame;
 
         if (playerColor.equals("WHITE")) {
@@ -178,7 +171,7 @@ public class GameDataAccessSQL implements GameDAO {
     }
 
     private GameData parseGame(ResultSet resultSet) throws SQLException {
-        var Id = resultSet.getInt("gameId");
+        var gameId = resultSet.getInt("gameId");
         var whiteUsername = resultSet.getString("whiteUsername");
         var blackUsername = resultSet.getString("blackUsername");
         var gameName = resultSet.getString("gameName");
@@ -186,6 +179,15 @@ public class GameDataAccessSQL implements GameDAO {
 
         ChessGame chessGame = new Gson().fromJson(chessGameJson, ChessGame.class);
 
-        return new GameData(Id, whiteUsername, blackUsername, gameName, chessGame);
+        return new GameData(gameId, whiteUsername, blackUsername, gameName, chessGame);
+    }
+
+    public void takenSideError(String playerColor, GameData game) throws DataAccessException {
+        if (playerColor.equals("WHITE") && game.getWhiteUsername() != null) {
+            throw new DataAccessException("White side already taken");
+        }
+        if (playerColor.equals("BLACK") && game.getBlackUsername() != null) {
+            throw new DataAccessException("Black side already taken");
+        }
     }
 }
