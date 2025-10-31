@@ -13,7 +13,7 @@ public class AuthDataAccessSQL extends SQLDataAccessBase implements AuthDAO {
             """
             CREATE TABLE IF NOT EXISTS authDatas (
               `authToken` varchar(256) NOT NULL,
-              `username` varchar(256) NOT NULL UNIQUE,
+              `username` varchar(256) NOT NULL,
               PRIMARY KEY (`authToken`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
