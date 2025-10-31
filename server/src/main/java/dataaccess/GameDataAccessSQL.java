@@ -36,7 +36,6 @@ public class GameDataAccessSQL implements GameDAO {
             Connection connection = DatabaseManager.getConnection();
             try {
                 var preparedStatement = connection.prepareStatement("INSERT INTO games (whiteUsername, blackUsername, gameName, chessGame) VALUES (?, ?, ?, ?)");
-                int returnGeneratedKeys = Statement.RETURN_GENERATED_KEYS;
 
                 String gameJson = new Gson().toJson(new ChessGame());
 
@@ -44,7 +43,7 @@ public class GameDataAccessSQL implements GameDAO {
                 preparedStatement.setString(2, null);
                 preparedStatement.setString(3, gameName);
                 preparedStatement.setString(4, gameJson);
-                return returnGeneratedKeys;
+                return preparedStatement.executeUpdate();
             } catch (SQLException e) {
                 throw new RuntimeException(e.getMessage());
             }
