@@ -84,7 +84,6 @@ public class ServiceUnitTest {
         assertNull(authDAO.getAuthByToken(reg.authToken()));
     }
 
-
     @Test
     public void testLogoutFailsWithInvalidToken() {
         DataAccessException ex = assertThrows(DataAccessException.class, () -> {
