@@ -3,10 +3,13 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import io.javalin.http.Context;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import service.*;
 
 public class GameHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(GameHandler.class);
     private final GameService gameService;
     private final Gson serializer = new Gson();
 
@@ -24,11 +27,7 @@ public class GameHandler {
 
         } catch (DataAccessException e) {
             String msg = e.getMessage().toLowerCase();
-            if (msg.contains("no auth")) {
-                ctx.status(401).json(new Message(e.getMessage()));
-            } else {
-                ctx.status(500).json(new Message(e.getMessage()));
-            }
+            noAuthBlock(msg, ctx, e);
         }
     }
 
@@ -47,11 +46,7 @@ public class GameHandler {
 
         } catch (DataAccessException e) {
             String msg = e.getMessage().toLowerCase();
-            if (msg.contains("no auth")) {
-                ctx.status(401).json(new Message(e.getMessage()));
-            } else {
-                ctx.status(500).json(new Message(e.getMessage()));
-            }
+            noAuthBlock(msg, ctx, e);
         }
     }
 
@@ -76,11 +71,16 @@ public class GameHandler {
                 ctx.status(403).json(new Message(e.getMessage()));
             } else if (msg.contains("not found")) {
                 ctx.status(400).json(new Message(e.getMessage()));
-            } else if (msg.contains("no auth")) {
-                ctx.status(401).json(new Message(e.getMessage()));
-            } else {
-                ctx.status(500).json(new Message(e.getMessage()));
             }
+            noAuthBlock(msg, ctx, e);
+        }
+    }
+
+    private void noAuthBlock (String msg, Context ctx, DataAccessException e) {
+        if (msg.contains("no auth")) {
+            ctx.status(401).json(new Message(e.getMessage()));
+        } else {
+            ctx.status(500).json(new Message(e.getMessage()));
         }
     }
 
