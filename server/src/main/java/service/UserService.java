@@ -5,6 +5,7 @@ import dataaccess.DataAccessException;
 import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class UserService {
 
@@ -33,7 +34,7 @@ public class UserService {
     public LoginResult login(LoginRequest loginRequest) throws DataAccessException {
         UserData user = userDAO.getUserByUsername(loginRequest.username());
 
-        if (user == null || !user.getPassword().equals(loginRequest.password())) {
+        if (user == null || !BCrypt.checkpw(loginRequest.password(), user.getPassword())) {
             throw new DataAccessException("Error: Incorrect username or password");
         }
 
