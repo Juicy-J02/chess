@@ -68,8 +68,11 @@ public class GameHandler {
                 ctx.status(403).json(new Message(e.getMessage()));
             } else if (msg.contains("not found")) {
                 ctx.status(400).json(new Message(e.getMessage()));
+            } else if (msg.contains("no auth")) {
+                ctx.status(401).json(new Message(e.getMessage()));
+            } else {
+                ctx.status(500).json(new Message(e.getMessage()));
             }
-            new AuthErrorBlock(msg, ctx, e);
         }
     }
 
