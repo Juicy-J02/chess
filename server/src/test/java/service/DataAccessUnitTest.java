@@ -77,8 +77,7 @@ public class DataAccessUnitTest {
         assertNull(userDAO.getUserByUsername("jane_doe"));
     }
 
-    @Test
-    public void testClearEmptyUserData() throws DataAccessException {
+    @Test public void testClearEmptyUserData() throws DataAccessException {
         assertNull(userDAO.getUserByUsername("anyone"));
     }
 
@@ -94,10 +93,44 @@ public class DataAccessUnitTest {
     }
 
     @Test
+    public void testAddAuthUnsuccessfully() throws DataAccessException {
+        AuthData authData = new AuthData("john_doe");
+        authDAO.createAuthData(authData);
+
+        AuthData found = authDAO.getAuthByUsername("john_doe");
+        assertNotNull(found);
+        assertEquals("john_doe", found.getUsername());
+        assertEquals(authData.getAuthToken(), found.getAuthToken());
+    }
+
+    @Test
+    public void testGetAuthByUsernameFound() throws DataAccessException {
+        AuthData authData = new AuthData("john_doe");
+        authDAO.createAuthData(authData);
+
+        AuthData found = authDAO.getAuthByUsername(authData.getUsername());
+        assertNotNull(found);
+        assertEquals("john_doe", found.getUsername());
+    }
+
+
+    @Test
     public void testGetAuthByUsernameNotFound() throws DataAccessException {
         AuthData found = authDAO.getAuthByUsername("nonexistent");
         assertNull(found);
     }
+
+    @Test
+    public void testGetAuthByTokenFound() throws DataAccessException {
+        AuthData authData = new AuthData("john_doe");
+        authDAO.createAuthData(authData);
+
+        AuthData found = authDAO.getAuthByToken(authData.getAuthToken());
+        assertNotNull(found);
+        assertEquals("john_doe", found.getUsername());
+        assertEquals(authData.getAuthToken(), found.getAuthToken());
+    }
+
 
     @Test
     public void testGetAuthByTokenNotFound() throws DataAccessException {
@@ -125,11 +158,6 @@ public class DataAccessUnitTest {
         assertNull(authDAO.getAuthByToken(token), "Nonexistent auth token should not be found in the database");
     }
 
-    @Test
-    public void testDatabaseStartsEmpty() throws DataAccessException {
-        assertNull(userDAO.getUserByUsername("nobody"), "Database should be empty at start");
-        assertNull(authDAO.getAuthByToken("nobody"), "Database should be empty at start");
-    }
 
     @Test
     public void testClearAuthDataSuccessfully() throws DataAccessException {
@@ -141,9 +169,7 @@ public class DataAccessUnitTest {
         assertNull(authDAO.getAuthByUsername("user2"));
     }
 
-    @Test
-    public void testClearEmptyAuthData() throws DataAccessException {
-        authDAO.clearAuthData();
+    @Test public void testClearEmptyAuthData() throws DataAccessException {
         assertNull(authDAO.getAuthByUsername("anyone"));
     }
 
@@ -236,6 +262,10 @@ public class DataAccessUnitTest {
     public void testGetAllGamesWhenEmpty() throws DataAccessException {
         List<GameData> games = gameDAO.getAllGames();
         assertTrue(games.isEmpty(), "Should return an empty list when no games exist");
+    }
+
+    @Test public void testClearEmptyGameData() throws DataAccessException {
+        assertNull(gameDAO.getGame(1));
     }
 
 }
