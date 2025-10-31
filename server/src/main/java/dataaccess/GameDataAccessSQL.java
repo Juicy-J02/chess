@@ -7,7 +7,6 @@ import com.google.gson.Gson;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +25,7 @@ public class GameDataAccessSQL implements GameDAO {
                 }
             }
         } catch (DataAccessException e) {
-            System.err.println(e.getMessage());
+            System.err.println("Data Access Error:" + e.getMessage());
         }
     }
 
@@ -48,7 +47,7 @@ public class GameDataAccessSQL implements GameDAO {
                 throw new RuntimeException(e.getMessage());
             }
         } catch (DataAccessException e) {
-            throw new DataAccessException(e.getMessage());
+            throw new DataAccessException("Data Access Error:" + e.getMessage());
         }
     }
 
@@ -76,7 +75,7 @@ public class GameDataAccessSQL implements GameDAO {
             }
             return null;
         } catch (DataAccessException e) {
-            throw new DataAccessException(e.getMessage());
+            throw new DataAccessException("Data Access Error:" + e.getMessage());
         }
     }
 
@@ -105,7 +104,7 @@ public class GameDataAccessSQL implements GameDAO {
             }
             return games;
         } catch (DataAccessException e) {
-            throw new DataAccessException(e.getMessage());
+            throw new DataAccessException("Data Access Error:" + e.getMessage());
         }
     }
 
@@ -138,7 +137,7 @@ public class GameDataAccessSQL implements GameDAO {
                     throw new RuntimeException(e.getMessage());
                 }
             } catch (DataAccessException e) {
-                throw new DataAccessException(e.getMessage());
+                throw new DataAccessException("Data Access Error:" + e.getMessage());
             }
 
         } else if (playerColor.equals("BLACK")) {
@@ -157,7 +156,7 @@ public class GameDataAccessSQL implements GameDAO {
                     throw new RuntimeException(e.getMessage());
                 }
             } catch (DataAccessException e) {
-                throw new DataAccessException(e.getMessage());
+                throw new DataAccessException("Data Access Error:" + e.getMessage());
             }
         }
     }
@@ -173,7 +172,7 @@ public class GameDataAccessSQL implements GameDAO {
                 throw new RuntimeException(e.getMessage());
             }
         } catch (DataAccessException e) {
-            throw new DataAccessException(e.getMessage());
+            throw new DataAccessException("Data Access Error:" + e.getMessage());
         }
     }
 

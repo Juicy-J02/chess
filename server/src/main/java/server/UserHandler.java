@@ -27,7 +27,7 @@ public class UserHandler {
             ctx.status(200).json(result);
 
         } catch (DataAccessException e) {
-            ctx.status(403).json(new Message(e.getMessage()));
+            ctx.status(500).json(new Message(e.getMessage()));
         }
     }
 
@@ -44,7 +44,7 @@ public class UserHandler {
             ctx.status(200).json(result);
 
         } catch (DataAccessException e) {
-            ctx.status(401).json(new Message(e.getMessage()));
+            ctx.status(500).json(new Message(e.getMessage()));
         }
     }
 
@@ -61,7 +61,7 @@ public class UserHandler {
             ctx.status(200);
 
         } catch (DataAccessException e) {
-            ctx.status(401).json(new Message(e.getMessage()));
+            ctx.status(500).json(new Message(e.getMessage()));
         }
     }
 

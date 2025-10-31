@@ -21,7 +21,7 @@ public class AuthDataAccessSQL implements AuthDAO {
                 }
             }
         } catch (DataAccessException e) {
-            System.err.println(e.getMessage());
+            System.err.println("Data Access Error:" + e.getMessage());
         }
     }
 
@@ -38,7 +38,7 @@ public class AuthDataAccessSQL implements AuthDAO {
                 throw new RuntimeException(e.getMessage());
             }
         } catch (DataAccessException e) {
-            throw new DataAccessException(e.getMessage());
+            throw new DataAccessException("Data Access Error:" + e.getMessage());
         }
     }
 
@@ -54,7 +54,7 @@ public class AuthDataAccessSQL implements AuthDAO {
                 throw new RuntimeException(e.getMessage());
             }
         } catch (DataAccessException e) {
-            throw new DataAccessException(e.getMessage());
+            throw new DataAccessException("Data Access Error:" + e.getMessage());
         }
     }
 
@@ -74,7 +74,7 @@ public class AuthDataAccessSQL implements AuthDAO {
                 throw new RuntimeException(e.getMessage());
             }
         } catch (DataAccessException e) {
-            throw new DataAccessException(e.getMessage());
+            throw new DataAccessException("Data Access Error:" + e.getMessage());
         }
         return null;
     }
@@ -96,7 +96,7 @@ public class AuthDataAccessSQL implements AuthDAO {
                 throw new RuntimeException(e.getMessage());
             }
         } catch (DataAccessException e) {
-            throw new DataAccessException(e.getMessage());
+            throw new DataAccessException("Data Access Error:" + e.getMessage());
         }
         return null;
     }
@@ -112,7 +112,7 @@ public class AuthDataAccessSQL implements AuthDAO {
                 throw new RuntimeException(e.getMessage());
             }
         } catch (DataAccessException e) {
-            throw new DataAccessException(e.getMessage());
+            throw new DataAccessException("Data Access Error:" + e.getMessage());
         }
     }
 

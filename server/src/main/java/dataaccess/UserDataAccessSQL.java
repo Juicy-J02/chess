@@ -20,7 +20,7 @@ public class UserDataAccessSQL implements UserDAO {
                 }
             }
         } catch (DataAccessException e) {
-            System.err.println(e.getMessage());
+            System.err.println("Data Access Error:" + e.getMessage());
         }
     }
 
@@ -39,7 +39,7 @@ public class UserDataAccessSQL implements UserDAO {
                 throw new RuntimeException(e.getMessage());
             }
         } catch (DataAccessException e) {
-            throw new DataAccessException(e.getMessage());
+            throw new DataAccessException("Data Access Error:" + e.getMessage());
         }
     }
 
@@ -62,7 +62,7 @@ public class UserDataAccessSQL implements UserDAO {
             }
             return null;
         } catch (DataAccessException e) {
-            throw new DataAccessException(e.getMessage());
+            throw new DataAccessException("Data Access Error:" + e.getMessage());
         }
     }
 
@@ -77,7 +77,7 @@ public class UserDataAccessSQL implements UserDAO {
                 throw new RuntimeException(e.getMessage());
             }
         } catch (DataAccessException e) {
-            throw new DataAccessException(e.getMessage());
+            throw new DataAccessException("Data Access Error:" + e.getMessage());
         }
     }
 
