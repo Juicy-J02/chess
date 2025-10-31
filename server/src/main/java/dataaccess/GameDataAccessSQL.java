@@ -16,6 +16,18 @@ public class GameDataAccessSQL implements GameDAO {
         try {
             DatabaseManager.createDatabase();
             Connection connection = DatabaseManager.getConnection();
+            String[] createStatements = {
+                    """
+            CREATE TABLE IF NOT EXISTS games (
+              `gameId` int NOT NULL AUTO_INCREMENT,
+              `whiteUsername` varchar(256),
+              `blackUsername` varchar(256),
+              `gameName` varchar(256) NOT NULL,
+              `chessGame` TEXT,
+              PRIMARY KEY (`gameId`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            """
+            };
             for (String statement : createStatements) {
                 try {
                     var preparedStatement = connection.prepareStatement(statement);
@@ -165,19 +177,6 @@ public class GameDataAccessSQL implements GameDAO {
         }
     }
 
-    private final String[] createStatements = {
-            """
-            CREATE TABLE IF NOT EXISTS games (
-              `gameId` int NOT NULL AUTO_INCREMENT,
-              `whiteUsername` varchar(256),
-              `blackUsername` varchar(256),
-              `gameName` varchar(256) NOT NULL,
-              `chessGame` TEXT,
-              PRIMARY KEY (`gameId`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-            """
-    };
-
     private GameData parseGame(ResultSet resultSet) throws SQLException {
         var Id = resultSet.getInt("gameId");
         var whiteUsername = resultSet.getString("whiteUsername");
@@ -187,8 +186,6 @@ public class GameDataAccessSQL implements GameDAO {
 
         ChessGame chessGame = new Gson().fromJson(chessGameJson, ChessGame.class);
 
-        GameData game = new GameData(Id, whiteUsername, blackUsername, gameName, chessGame);
-
-        return game;
+        return new GameData(Id, whiteUsername, blackUsername, gameName, chessGame);
     }
 }
