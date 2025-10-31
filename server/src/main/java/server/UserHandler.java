@@ -31,7 +31,7 @@ public class UserHandler {
             if (msg.contains("user already")) {
                 ctx.status(403).json(new Message(e.getMessage()));
             } else {
-                ctx.status(500).json(new Message(e.getMessage()));
+                ctx.status(500).json(new Message("Error: " + e.getMessage()));
             }
         }
     }
@@ -53,7 +53,7 @@ public class UserHandler {
             if (msg.contains("incorrect username")) {
                 ctx.status(401).json(new Message(e.getMessage()));
             } else {
-                ctx.status(500).json(new Message(e.getMessage()));
+                ctx.status(500).json(new Message("Error: " + e.getMessage()));
             }
         }
     }

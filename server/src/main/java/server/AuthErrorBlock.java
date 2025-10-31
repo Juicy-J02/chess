@@ -9,7 +9,7 @@ public class AuthErrorBlock {
         if (msg.contains("no auth")) {
             ctx.status(401).json(new Message(e.getMessage()));
         } else {
-            ctx.status(500).json(new Message(e.getMessage()));
+            ctx.status(500).json(new Message("Error: " + e.getMessage()));
         }
     }
 
