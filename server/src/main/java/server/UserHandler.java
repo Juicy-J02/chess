@@ -27,7 +27,12 @@ public class UserHandler {
             ctx.status(200).json(result);
 
         } catch (DataAccessException e) {
-            ctx.status(500).json(new Message(e.getMessage()));
+            String msg = e.getMessage().toLowerCase();
+            if (msg.contains("user already")) {
+                ctx.status(403).json(new Message(e.getMessage()));
+            } else {
+                ctx.status(500).json(new Message(e.getMessage()));
+            }
         }
     }
 
@@ -44,31 +49,33 @@ public class UserHandler {
             ctx.status(200).json(result);
 
         } catch (DataAccessException e) {
-            ctx.status(500).json(new Message(e.getMessage()));
+            String msg = e.getMessage().toLowerCase();
+            if (msg.contains("incorrect username")) {
+                ctx.status(401).json(new Message(e.getMessage()));
+            } else {
+                ctx.status(500).json(new Message(e.getMessage()));
+            }
         }
     }
 
     public void logoutUser(Context ctx) {
         try {
             String authToken = ctx.header("authorization");
-            if (authToken == null) {
-                ctx.status(401).json(new Message("Error: unauthorized"));
-                return;
-            }
 
             LogoutRequest logoutRequest = new LogoutRequest(authToken);
             userService.logout(logoutRequest);
             ctx.status(200);
 
         } catch (DataAccessException e) {
-            ctx.status(500).json(new Message(e.getMessage()));
+            String msg = e.getMessage().toLowerCase();
+            if (msg.contains("no auth")) {
+                ctx.status(401).json(new Message(e.getMessage()));
+            } else {
+                ctx.status(500).json(new Message(e.getMessage()));
+            }
         }
     }
 
-    private static class Message {
-        public final String message;
-        public Message(String message) {
-            this.message = message;
-        }
+    private record Message(String message) {
     }
 }

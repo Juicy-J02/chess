@@ -17,14 +17,15 @@ public class ClearHandler {
             clearService.clearDB();
             ctx.status(200).json(new Message("Data cleared successfully"));
         } catch (DataAccessException e) {
-            ctx.status(500).json(new Message("Error: " + e.getMessage()));
+            String msg = e.getMessage().toLowerCase();
+            if (msg.contains("no auth")) {
+                ctx.status(401).json(new Message(e.getMessage()));
+            } else {
+                ctx.status(500).json(new Message(e.getMessage()));
+            }
         }
     }
 
-    private static class Message {
-        public final String message;
-        public Message(String message) {
-            this.message = message;
-        }
+    private record Message(String message) {
     }
 }

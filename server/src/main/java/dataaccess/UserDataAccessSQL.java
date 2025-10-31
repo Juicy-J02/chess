@@ -5,14 +5,11 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 
-public class UserDataAccessSQL implements UserDAO {
+public class UserDataAccessSQL extends SQLDataAccessBase implements UserDAO {
 
     public UserDataAccessSQL() {
-        try {
-            DatabaseManager.createDatabase();
-            Connection connection = DatabaseManager.getConnection();
-            String[] createStatements = {
-                    """
+        super(new String[] {
+            """
             CREATE TABLE IF NOT EXISTS users (
               `username` varchar(256) NOT NULL,
               `password` varchar(256) NOT NULL,
@@ -20,18 +17,7 @@ public class UserDataAccessSQL implements UserDAO {
               PRIMARY KEY (`username`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
-            };
-            for (String statement : createStatements) {
-                try {
-                    var preparedStatement = connection.prepareStatement(statement);
-                    preparedStatement.executeUpdate();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e.getMessage());
-                }
-            }
-        } catch (DataAccessException e) {
-            System.err.println("Data Access Error:" + e.getMessage());
-        }
+        });
     }
 
     @Override

@@ -4,6 +4,7 @@ import dataaccess.*;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,9 +14,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class DataAccessUnitTest {
 
-    private UserDAO userDAO;
-    private AuthDAO authDAO;
-    private GameDAO gameDAO;
+    private static UserDAO userDAO;
+    private static AuthDAO authDAO;
+    private static GameDAO gameDAO;
 
     @BeforeEach
     public void setUp() throws DataAccessException {
@@ -24,6 +25,13 @@ public class DataAccessUnitTest {
         authDAO = new AuthDataAccessSQL();
         authDAO.clearAuthData();
         gameDAO = new GameDataAccessSQL();
+        gameDAO.clearGames();
+    }
+
+    @AfterAll
+    public static void clear() throws DataAccessException {
+        userDAO.clearUserData();
+        authDAO.clearAuthData();
         gameDAO.clearGames();
     }
 

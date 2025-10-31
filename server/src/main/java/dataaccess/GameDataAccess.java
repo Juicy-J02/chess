@@ -37,10 +37,10 @@ public class GameDataAccess implements GameDAO {
         GameData game = getGame(gameID);
 
         if (playerColor.equals("WHITE") && game.getWhiteUsername() != null) {
-            throw new DataAccessException("White side already taken");
+            throw new DataAccessException("Error: White side already taken");
         }
         if (playerColor.equals("BLACK") && game.getBlackUsername() != null) {
-            throw new DataAccessException("Black side already taken");
+            throw new DataAccessException("Error: Black side already taken");
         }
 
         GameData newGame = null;

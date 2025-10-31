@@ -6,32 +6,18 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class AuthDataAccessSQL implements AuthDAO {
+public class AuthDataAccessSQL extends SQLDataAccessBase implements AuthDAO {
 
     public AuthDataAccessSQL() {
-        try {
-            DatabaseManager.createDatabase();
-            Connection connection = DatabaseManager.getConnection();
-            String[] createStatements = {
-                    """
+        super(new String[] {
+            """
             CREATE TABLE IF NOT EXISTS authDatas (
               `authToken` varchar(256) NOT NULL,
               `username` varchar(256) NOT NULL,
               PRIMARY KEY (`authToken`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
-            };
-            for (String statement : createStatements) {
-                try {
-                    var preparedStatement = connection.prepareStatement(statement);
-                    preparedStatement.executeUpdate();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e.getMessage());
-                }
-            }
-        } catch (DataAccessException e) {
-            System.err.println("Data Access Error:" + e.getMessage());
-        }
+        });
     }
 
     @Override

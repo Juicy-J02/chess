@@ -10,14 +10,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GameDataAccessSQL implements GameDAO {
+public class GameDataAccessSQL extends SQLDataAccessBase implements GameDAO {
 
     public GameDataAccessSQL() {
-        try {
-            DatabaseManager.createDatabase();
-            Connection connection = DatabaseManager.getConnection();
-            String[] createStatements = {
-                    """
+        super(new String[] {
+            """
             CREATE TABLE IF NOT EXISTS games (
               `gameId` int NOT NULL AUTO_INCREMENT,
               `whiteUsername` varchar(256),
@@ -27,18 +24,7 @@ public class GameDataAccessSQL implements GameDAO {
               PRIMARY KEY (`gameId`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
-            };
-            for (String statement : createStatements) {
-                try {
-                    var preparedStatement = connection.prepareStatement(statement);
-                    preparedStatement.executeUpdate();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e.getMessage());
-                }
-            }
-        } catch (DataAccessException e) {
-            System.err.println("Data Access Error:" + e.getMessage());
-        }
+        });
     }
 
     @Override

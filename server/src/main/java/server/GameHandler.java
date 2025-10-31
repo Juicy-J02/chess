@@ -17,27 +17,24 @@ public class GameHandler {
     public void listAllGames(Context ctx) {
         try {
             String authToken = ctx.header("authorization");
-            if (authToken == null) {
-                ctx.status(401).json(new Message("Error: unauthorized"));
-                return;
-            }
 
             GameListRequest gameListRequest = new GameListRequest(authToken);
             GameListResult result = gameService.getGames(gameListRequest);
             ctx.status(200).json(result);
 
         } catch (DataAccessException e) {
-            ctx.status(500).json(new Message(e.getMessage()));
+            String msg = e.getMessage().toLowerCase();
+            if (msg.contains("no auth")) {
+                ctx.status(401).json(new Message(e.getMessage()));
+            } else {
+                ctx.status(500).json(new Message(e.getMessage()));
+            }
         }
     }
 
     public void createGame(Context ctx) {
         try {
             String authToken = ctx.header("authorization");
-            if (authToken == null) {
-                ctx.status(401).json(new Message("Error: unauthorized"));
-                return;
-            }
 
             CreateGameRequest createGameRequest = serializer.fromJson(ctx.body(), CreateGameRequest.class);
             if (createGameRequest.gameName() == null || createGameRequest.gameName().isEmpty()) {
@@ -49,18 +46,18 @@ public class GameHandler {
             ctx.status(200).json(result);
 
         } catch (DataAccessException e) {
-            ctx.status(500).json(new Message(e.getMessage()));
+            String msg = e.getMessage().toLowerCase();
+            if (msg.contains("no auth")) {
+                ctx.status(401).json(new Message(e.getMessage()));
+            } else {
+                ctx.status(500).json(new Message(e.getMessage()));
+            }
         }
     }
 
     public void joinGame(Context ctx) {
         try {
             String authToken = ctx.header("authorization");
-            if (authToken == null) {
-                ctx.status(401).json(new Message("Error: unauthorized"));
-                return;
-            }
-
             JoinGameRequest joinGameRequest = serializer.fromJson(ctx.body(), JoinGameRequest.class);
 
             if (joinGameRequest.gameID() == null || joinGameRequest.gameID() <= 0 ||
@@ -87,10 +84,6 @@ public class GameHandler {
         }
     }
 
-    private static class Message {
-        public final String message;
-        public Message(String message) {
-            this.message = message;
-        }
+    private record Message(String message) {
     }
 }
