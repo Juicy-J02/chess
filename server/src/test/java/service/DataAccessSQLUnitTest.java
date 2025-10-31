@@ -21,7 +21,7 @@ public class DataAccessSQLUnitTest {
     public void setUp() throws DataAccessException {
         userDAO = new UserDataAccessSQL();
         userDAO.clearUserData();
-        authDAO = new AuthDataAccess();
+        authDAO = new AuthDataAccessSQL();
         authDAO.clearAuthData();
         gameDAO = new GameDataAccess();
         gameDAO.clearGames();

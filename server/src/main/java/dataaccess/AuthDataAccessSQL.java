@@ -1,7 +1,6 @@
 package dataaccess;
 
 import model.AuthData;
-import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -69,7 +68,7 @@ public class AuthDataAccessSQL implements AuthDAO {
                 ResultSet resultSet = preparedStatement.executeQuery();
                 if (resultSet.next()) {
                     var username = resultSet.getString("username");
-                    return new AuthData(username);
+                    return new AuthData(authToken, username);
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e.getMessage());
@@ -90,7 +89,8 @@ public class AuthDataAccessSQL implements AuthDAO {
                 ResultSet resultSet = preparedStatement.executeQuery();
                 if (resultSet.next()) {
                     var user = resultSet.getString("username");
-                    return new AuthData(user);
+                    var authToken = resultSet.getString("authToken");
+                    return new AuthData(authToken, user);
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e.getMessage());

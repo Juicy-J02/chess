@@ -14,8 +14,8 @@ public class Server {
     public Server() {
 
         UserDAO userDataAccess = new UserDataAccessSQL();
+        AuthDAO authDataAccess = new AuthDataAccessSQL();
         GameDAO gameDataAccess = new GameDataAccess();
-        AuthDAO authDataAccess = new AuthDataAccess();
 
         UserService userService = new UserService(userDataAccess, authDataAccess);
         GameService gameService = new GameService(authDataAccess, gameDataAccess);
