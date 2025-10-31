@@ -19,11 +19,11 @@ public class DataAccessUnitTest {
 
     @BeforeEach
     public void setUp() throws DataAccessException {
-        userDAO = new UserDataAccess();
+        userDAO = new UserDataAccessSQL();
         userDAO.clearUserData();
-        authDAO = new AuthDataAccess();
+        authDAO = new AuthDataAccessSQL();
         authDAO.clearAuthData();
-        gameDAO = new GameDataAccess();
+        gameDAO = new GameDataAccessSQL();
         gameDAO.clearGames();
     }
 

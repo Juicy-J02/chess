@@ -5,24 +5,27 @@ import model.AuthData;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mindrot.jbcrypt.BCrypt;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ServiceUnitTest {
 
     private UserService userService;
-    private GameService gameService;
     private UserDAO userDAO;
     private AuthDAO authDAO;
-    private GameDAO gameDAO;
 
     @BeforeEach
-    public void setup() {
-        userDAO = new UserDataAccess();
-        authDAO = new AuthDataAccess();
-        gameDAO = new GameDataAccess();
+    public void setup() throws DataAccessException {
+        userDAO = new UserDataAccessSQL();
+        authDAO = new AuthDataAccessSQL();
+        GameDAO gameDAO = new GameDataAccessSQL();
+
+        userDAO.clearUserData();
+        authDAO.clearAuthData();
+        gameDAO.clearGames();
 
         userService = new UserService(userDAO, authDAO);
-        gameService = new GameService(authDAO, gameDAO);
     }
 
     @Test
@@ -36,7 +39,7 @@ public class ServiceUnitTest {
 
         UserData storedUser = userDAO.getUserByUsername("john");
         assertNotNull(storedUser);
-        assertEquals("password123", storedUser.getPassword());
+        assertTrue(BCrypt.checkpw("password123", storedUser.getPassword()));
 
         AuthData storedAuth = authDAO.getAuthByUsername("john");
         assertNotNull(storedAuth);
@@ -47,7 +50,7 @@ public class ServiceUnitTest {
         RegisterRequest request = new RegisterRequest("john", "password123", "john@email.com");
         userService.register(request);
 
-        DataAccessException exception = assertThrows(DataAccessException.class, () -> {
+        DataAccessException exception = assertThrows(DataAccessException.class, () ->   {
             userService.register(request);
         });
         assertTrue(exception.getMessage().contains("User already exists"));
