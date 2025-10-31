@@ -68,11 +68,7 @@ public class UserHandler {
 
         } catch (DataAccessException e) {
             String msg = e.getMessage().toLowerCase();
-            if (msg.contains("no auth")) {
-                ctx.status(401).json(new Message(e.getMessage()));
-            } else {
-                ctx.status(500).json(new Message(e.getMessage()));
-            }
+            new AuthErrorBlock(msg, ctx, e);
         }
     }
 
