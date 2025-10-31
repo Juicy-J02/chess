@@ -92,16 +92,6 @@ public class DataAccessUnitTest {
         assertEquals(authData.getAuthToken(), found.getAuthToken());
     }
 
-    @Test
-    public void testAddAuthUnsuccessfully() throws DataAccessException {
-        AuthData authData = new AuthData("john_doe");
-        authDAO.createAuthData(authData);
-
-        AuthData found = authDAO.getAuthByUsername("john_doe");
-        assertNotNull(found);
-        assertEquals("john_doe", found.getUsername());
-        assertEquals(authData.getAuthToken(), found.getAuthToken());
-    }
 
     @Test
     public void testGetAuthByUsernameFound() throws DataAccessException {
