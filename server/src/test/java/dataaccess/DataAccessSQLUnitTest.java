@@ -1,6 +1,5 @@
-package service;
+package dataaccess;
 
-import dataaccess.*;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -11,7 +10,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class DataAccessUnitTest {
+public class DataAccessSQLUnitTest {
 
     private static UserDAO userDAO;
     private static AuthDAO authDAO;
