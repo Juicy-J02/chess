@@ -37,7 +37,7 @@ public class PreloginUI {
 
                 case "help":
                     System.out.print("   register <USERNAME> <PASSWORD> <EMAIL> - to create an account\n");
-                    System.out.print("   login <USERNAME> <PASSWORD> = to play chess\n");
+                    System.out.print("   login <USERNAME> <PASSWORD> - to play chess\n");
                     System.out.print("   quit - playing chess\n");
                     System.out.print("   help - with possible commands\n");
                     break;
@@ -53,6 +53,8 @@ public class PreloginUI {
                         String username = params[0];
                         String password = params[1];
                         server.login(new LoginRequest(username, password));
+                        new PostloginUI(this.server).run();
+                        break label;
                     }
                     break;
 
