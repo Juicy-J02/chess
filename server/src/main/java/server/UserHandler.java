@@ -50,7 +50,7 @@ public class UserHandler {
 
         } catch (DataAccessException e) {
             String msg = e.getMessage().toLowerCase();
-            if (msg.contains("incorrect username")) {
+            if (msg.contains("incorrect password") || msg.contains("no user found")) {
                 ctx.status(401).json(new Message(e.getMessage()));
             } else {
                 ctx.status(500).json(new Message("Error: " + e.getMessage()));
