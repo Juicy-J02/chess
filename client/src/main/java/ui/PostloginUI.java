@@ -1,10 +1,13 @@
 package ui;
 
+import model.GameData;
 import server.ServerFacade;
 import service.*;
 
 import java.awt.*;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.BLACK_KING;
@@ -13,6 +16,8 @@ import static ui.EscapeSequences.WHITE_KING;
 public class PostloginUI {
 
     ServerFacade server;
+    Map<Integer, Integer> gameNumberMap = new HashMap<>();
+
 
     public PostloginUI(ServerFacade server)  {
         this.server = server;
@@ -21,6 +26,7 @@ public class PostloginUI {
     public void run(String username, String authToken) throws Exception {
 
         System.out.print(BLACK_KING + "Logged in as " + username + WHITE_KING + "\n");
+
         Scanner scanner = new Scanner(System.in);
 
         label:
@@ -58,15 +64,29 @@ public class PostloginUI {
                     break label;
 
                 case "list":
-                    GameListResult gameListResult;
                     try {
-                        gameListResult = server.listGames(new GameListRequest(authToken), authToken);
+                        int gameNumber = 0;
+                        GameListResult gameListResult = server.listGames(new GameListRequest(authToken), authToken);
+                        for (GameData game : gameListResult.games()) {
+                            String gameName = game.getGameName();
+                            String whiteUsername = game.getWhiteUsername();
+                            String blackUsername = game.getBlackUsername();
+                            gameNumber += 1;
+
+                            gameNumberMap.put(gameNumber, game.getGameID());
+
+                            System.out.println(gameNumber + ": " + gameName);
+                            System.out.println("White player: " + whiteUsername);
+                            System.out.println("Black player: " + blackUsername);
+                            System.out.println(game.getGame());
+                            System.out.println();
+                        }
                     } catch (Exception ex) {
                         System.out.println(ex.getMessage());
                         break;
                     }
-                    System.out.println(gameListResult.games());
                     break;
+
 
                 case "create":
                     if (params.length < 1) {
@@ -97,22 +117,26 @@ public class PostloginUI {
                         System.out.print("too many inputs\n");
                     }
                     else {
-                        int gameID = 0;
-                        String playerColor = "";
+                        int gameID;
+                        String playerColor;
+                        int gameNumber;
 
                         try {
-                            gameID = Integer.parseInt(params[0]);
+                            gameNumber = Integer.parseInt(params[0]);
                             playerColor = params[1].toUpperCase();
+                            gameID = gameNumberMap.get(gameNumber);
                         } catch (Exception ex) {
-                            System.out.println();
+                            System.out.println("Join a game with <ID> [WHITE|BLACK]");
+                            break;
                         }
+
                         try {
                             server.joinGame(new JoinGameRequest(playerColor, gameID), authToken);
+                            System.out.println("Joined Game " + gameNumber + " as " + playerColor);
                         } catch (Exception ex) {
                             System.out.println(ex.getMessage());
                             break;
                         }
-                        System.out.println("Joined Game " + gameID + " as " + playerColor);
                         break;
                     }
                     break;
