@@ -12,6 +12,9 @@ public class PreloginUI {
 
     ServerFacade server;
 
+    private static final String TOO_MANY_ERROR = "Too many inputs";
+    private static final String NOT_ENOUGH_ERROR = "Not enough inputs";
+
     public PreloginUI(ServerFacade server)  {
         this.server = server;
     }
@@ -70,11 +73,11 @@ public class PreloginUI {
 
     private boolean login(String[] params) throws Exception {
         if (params.length < 2) {
-            System.out.println("Please input a username and password");
+            System.out.println(NOT_ENOUGH_ERROR);
             return false;
         }
         if (params.length > 2) {
-            System.out.println("Too many inputs");
+            System.out.println(TOO_MANY_ERROR);
             return false;
         }
         String username = params[0];
@@ -99,11 +102,11 @@ public class PreloginUI {
 
     private boolean register(String[] params) throws Exception {
         if (params.length < 3) {
-            System.out.println("Please input a username, password, and email");
+            System.out.println(NOT_ENOUGH_ERROR);
             return false;
         }
         if (params.length > 3) {
-            System.out.println("Too many inputs");
+            System.out.println(TOO_MANY_ERROR);
             return false;
         }
         String username = params[0];
