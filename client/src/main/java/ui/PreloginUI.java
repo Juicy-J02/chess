@@ -58,7 +58,14 @@ public class PreloginUI {
                         try {
                             loginResult = server.login(new LoginRequest(username, password));
                         } catch (Exception ex) {
-                            System.out.println(ex.getMessage());
+                            if (ex.getMessage().toLowerCase().contains("incorrect")) {
+                                System.out.println("Password is incorrect for: " + username);
+                                break;
+                            }
+                            else if (ex.getMessage().toLowerCase().contains("no user")) {
+                                System.out.println("No username found for: " + username);
+                                break;
+                            }
                             break;
                         }
                         new PostloginUI(this.server).run(loginResult.username(), loginResult.authToken());
@@ -81,7 +88,10 @@ public class PreloginUI {
                         try {
                             registerResult = server.register(new RegisterRequest(username, password, email));
                         } catch (Exception ex) {
-                            System.out.println(ex.getMessage());
+                            if (ex.getMessage().toLowerCase().contains("user already")) {
+                                System.out.println("Username taken");
+                                break;
+                            }
                             break;
                         }
                         new PostloginUI(this.server).run(registerResult.username(), registerResult.authToken());

@@ -35,11 +35,11 @@ public class UserService {
         UserData user = userDAO.getUserByUsername(loginRequest.username());
 
         if (user == null) {
-            throw new DataAccessException("No user found");
+            throw new DataAccessException("Error: No user found");
         }
 
         if (!BCrypt.checkpw(loginRequest.password(), user.getPassword())) {
-            throw new DataAccessException("incorrect password");
+            throw new DataAccessException("Error: Incorrect password");
         }
 
         AuthData authData = new AuthData(loginRequest.username());
