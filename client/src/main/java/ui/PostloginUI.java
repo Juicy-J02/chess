@@ -141,6 +141,11 @@ public class PostloginUI {
                         try {
                             server.joinGame(new JoinGameRequest(playerColor, game.getGameID()), authToken);
                             System.out.println("Joined Game " + gameNumber + " as " + playerColor);
+                            if (playerColor.equals("WHITE")) {
+                                new GameplayUI(this.server).run(game, "White");
+                            } else {
+                                new GameplayUI(this.server).run(game, "Black");
+                            }
                         } catch (Exception ex) {
                             System.out.println(ex.getMessage());
                             break;
@@ -169,7 +174,7 @@ public class PostloginUI {
                                 break;
                             }
 
-                            System.out.println(game);
+                            new GameplayUI(this.server).run(game, "White");
                         } catch (Exception ex) {
                             System.out.println("Observe a game with <ID>");
                             break;
