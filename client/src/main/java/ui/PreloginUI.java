@@ -91,6 +91,7 @@ public class PreloginUI {
 
                 case "clear":
                     server.clear();
+                    break;
 
                 default:
                     System.out.println("Unknown command: " + cmd);
