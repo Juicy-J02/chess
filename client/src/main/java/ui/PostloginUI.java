@@ -16,7 +16,7 @@ import static ui.EscapeSequences.WHITE_KING;
 public class PostloginUI {
 
     ServerFacade server;
-    Map<Integer, Integer> gameNumberMap = new HashMap<>();
+    Map<Integer, GameData> gameNumberMap = new HashMap<>();
 
 
     public PostloginUI(ServerFacade server)  {
@@ -39,18 +39,20 @@ public class PostloginUI {
             String cmd = tokens[0];
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
 
+            System.out.println();
+
             switch (cmd) {
                 case "quit":
                     break label;
 
                 case "help":
-                    System.out.print("   create <NAME> - a game\n");
-                    System.out.print("   list - games\n");
-                    System.out.print("   join <ID> [WHITE|BLACK] - a game\n");
-                    System.out.print("   observe <ID> - a game\n");
-                    System.out.print("   logout - when you are done\n");
-                    System.out.print("   quit - playing chess\n");
-                    System.out.print("   help - with possible commands\n");
+                    System.out.println("   create <NAME> - a game");
+                    System.out.println("   list - games");
+                    System.out.println("   join <ID> [WHITE|BLACK] - a game");
+                    System.out.println("   observe <ID> - a game");
+                    System.out.println("   logout - when you are done");
+                    System.out.println("   quit - playing chess");
+                    System.out.println("   help - with possible commands");
                     break;
 
                 case "logout":
@@ -73,65 +75,71 @@ public class PostloginUI {
                             String blackUsername = game.getBlackUsername();
                             gameNumber += 1;
 
-                            gameNumberMap.put(gameNumber, game.getGameID());
+                            gameNumberMap.put(gameNumber, game);
 
                             System.out.println(gameNumber + ": " + gameName);
                             System.out.println("White player: " + whiteUsername);
                             System.out.println("Black player: " + blackUsername);
                             System.out.println(game.getGame());
-                            System.out.println();
+                            if (gameNumber < gameListResult.games().toArray().length) {
+                                System.out.println();
+                            }
                         }
+                        break;
                     } catch (Exception ex) {
                         System.out.println(ex.getMessage());
                         break;
                     }
-                    break;
-
 
                 case "create":
                     if (params.length < 1) {
-                        System.out.print("please input a game name\n");
+                        System.out.println("Please input a game name");
                     }
                     else if (params.length > 1) {
-                        System.out.print("too many inputs\n");
+                        System.out.println("Too many inputs");
                     }
                     else {
                         String gameName = params[0];
                         CreateGameResult createGameResult;
                         try {
                             createGameResult = server.createGame(new CreateGameRequest(gameName), authToken);
+                            System.out.println("Created game " + gameName + " ID: " + createGameResult.gameID());
                         } catch (Exception ex) {
                             System.out.println(ex.getMessage());
                             break;
                         }
-                        System.out.println("Created game " + createGameResult.gameID());
                         break;
                     }
                     break;
 
                 case "join":
                     if (params.length < 2) {
-                        System.out.print("please input a game ID and Player Color\n");
+                        System.out.println("Please input a game ID and Player Color");
                     }
                     else if (params.length > 2) {
-                        System.out.print("too many inputs\n");
+                        System.out.println("Too many inputs");
                     }
                     else {
-                        int gameID;
+                        GameData game;
                         String playerColor;
                         int gameNumber;
 
                         try {
                             gameNumber = Integer.parseInt(params[0]);
                             playerColor = params[1].toUpperCase();
-                            gameID = gameNumberMap.get(gameNumber);
+                            game = gameNumberMap.get(gameNumber);
+
+                            if (game == null) {
+                                System.out.println("See game numbers from list");
+                                break;
+                            }
                         } catch (Exception ex) {
                             System.out.println("Join a game with <ID> [WHITE|BLACK]");
                             break;
                         }
 
                         try {
-                            server.joinGame(new JoinGameRequest(playerColor, gameID), authToken);
+                            server.joinGame(new JoinGameRequest(playerColor, game.getGameID()), authToken);
                             System.out.println("Joined Game " + gameNumber + " as " + playerColor);
                         } catch (Exception ex) {
                             System.out.println(ex.getMessage());
@@ -140,6 +148,38 @@ public class PostloginUI {
                         break;
                     }
                     break;
+
+                case "observe":
+                    if (params.length < 1) {
+                        System.out.println("Please input a game number");
+                    }
+                    else if (params.length > 1) {
+                        System.out.println("Too many inputs");
+                    }
+                    else {
+                        GameData game;
+                        int gameNumber;
+
+                        try {
+                            gameNumber = Integer.parseInt(params[0]);
+                            game = gameNumberMap.get(gameNumber);
+
+                            if (game == null) {
+                                System.out.println("See game numbers from list");
+                                break;
+                            }
+
+                            System.out.println(game);
+                        } catch (Exception ex) {
+                            System.out.println("Observe a game with <ID>");
+                            break;
+                        }
+                    }
+                    break;
+
+                default:
+                    System.out.println("Unknown command: " + cmd);
+                    System.out.println("See help for list of commands");
             }
         }
     }

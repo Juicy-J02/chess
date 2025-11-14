@@ -31,23 +31,25 @@ public class PreloginUI {
             String cmd = tokens[0];
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
 
+            System.out.println();
+
             switch (cmd) {
                 case "quit":
                     break label;
 
                 case "help":
-                    System.out.print("   register <USERNAME> <PASSWORD> <EMAIL> - to create an account\n");
-                    System.out.print("   login <USERNAME> <PASSWORD> - to play chess\n");
-                    System.out.print("   quit - playing chess\n");
-                    System.out.print("   help - with possible commands\n");
+                    System.out.println("   register <USERNAME> <PASSWORD> <EMAIL> - to create an account");
+                    System.out.println("   login <USERNAME> <PASSWORD> - to play chess");
+                    System.out.println("   quit - playing chess");
+                    System.out.println("   help - with possible commands");
                     break;
 
                 case "login":
                     if (params.length < 2) {
-                        System.out.print("please input a username and password\n");
+                        System.out.println("Please input a username and password");
                     }
                     else if (params.length > 2) {
-                        System.out.print("too many inputs\n");
+                        System.out.println("Too many inputs");
                     }
                     else {
                         String username = params[0];
@@ -66,10 +68,10 @@ public class PreloginUI {
 
                 case "register":
                     if (params.length < 3) {
-                        System.out.print("please input a username and password\n");
+                        System.out.println("Please input a username and password");
                     }
                     else if (params.length > 3) {
-                        System.out.print("too many inputs\n");
+                        System.out.println("Too many inputs");
                     }
                     else {
                         String username = params[0];
@@ -89,6 +91,10 @@ public class PreloginUI {
 
                 case "clear":
                     server.clear();
+
+                default:
+                    System.out.println("Unknown command: " + cmd);
+                    System.out.println("See help for list of commands");
             }
         }
     }
