@@ -34,14 +34,14 @@ public class GameService {
         }
 
         if (createGameRequest.gameName() == null) {
-            throw new DataAccessException("Error: Game name required");
+            throw new DataAccessException("Game name required");
         }
 
         GameListResult games = getGames(new GameListRequest(authToken));
 
         for (GameData game : games.games()) {
             if (createGameRequest.gameName().equals(game.getGameName())) {
-                throw new DataAccessException("Error: Game already exists");
+                throw new DataAccessException("Game already exists");
             }
         }
 

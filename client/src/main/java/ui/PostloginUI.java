@@ -3,6 +3,7 @@ package ui;
 import server.ServerFacade;
 import service.*;
 
+import java.awt.*;
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -17,9 +18,9 @@ public class PostloginUI {
         this.server = server;
     }
 
-    public void run() {
+    public void run(String username, String authToken) throws Exception {
 
-        System.out.print(BLACK_KING + "Welcome to 240 chess. Type Help to get started." + WHITE_KING + "\n");
+        System.out.print(BLACK_KING + "Logged in as " + username + WHITE_KING + "\n");
         Scanner scanner = new Scanner(System.in);
 
         label:
@@ -44,6 +45,69 @@ public class PostloginUI {
                     System.out.print("   logout - when you are done\n");
                     System.out.print("   quit - playing chess\n");
                     System.out.print("   help - with possible commands\n");
+                    break;
+
+                case "logout":
+                    try {
+                        server.logout(new LogoutRequest(authToken), authToken);
+                    } catch (Exception ex) {
+                        System.out.println(ex.getMessage());
+                        break;
+                    }
+                    new PreloginUI(this.server).run();
+                    break label;
+
+                case "list":
+                    GameListResult gameListResult;
+                    try {
+                        gameListResult = server.listGames(new GameListRequest(authToken), authToken);
+                    } catch (Exception ex) {
+                        System.out.println(ex.getMessage());
+                        break;
+                    }
+                    System.out.println(gameListResult.games());
+                    break;
+
+                case "create":
+                    if (params.length < 1) {
+                        System.out.print("please input a game name\n");
+                    }
+                    else if (params.length > 1) {
+                        System.out.print("too many inputs\n");
+                    }
+                    else {
+                        String gameName = params[0];
+                        CreateGameResult createGameResult;
+                        try {
+                            createGameResult = server.createGame(new CreateGameRequest(gameName), authToken);
+                        } catch (Exception ex) {
+                            System.out.println(ex.getMessage());
+                            break;
+                        }
+                        System.out.println("Created game " + createGameResult.gameID());
+                        break;
+                    }
+                    break;
+
+                case "join":
+                    if (params.length < 2) {
+                        System.out.print("please input a game ID and Player Color\n");
+                    }
+                    else if (params.length > 2) {
+                        System.out.print("too many inputs\n");
+                    }
+                    else {
+                        Integer gameID = Integer.parseInt(params[0]);
+                        String playerColor = params[1].toUpperCase();
+                        try {
+                            server.joinGame(new JoinGameRequest(playerColor, gameID), authToken);
+                        } catch (Exception ex) {
+                            System.out.println(ex.getMessage());
+                            break;
+                        }
+                        System.out.println("Joined Game " + gameID + " as " + playerColor);
+                        break;
+                    }
                     break;
             }
         }

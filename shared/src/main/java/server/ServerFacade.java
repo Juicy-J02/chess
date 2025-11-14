@@ -18,51 +18,56 @@ public class ServerFacade {
         this.serverDomain = url;
     }
 
-    public void register(RegisterRequest registerRequest) throws Exception {
-        var request = buildRequest("POST", "/user", registerRequest);
+    public RegisterResult register(RegisterRequest registerRequest) throws Exception {
+        var request = buildRequest("POST", "/user", registerRequest, null);
         var response = sendRequest(request);
-        handleResponse(response, RegisterResult.class);
+        return handleResponse(response, RegisterResult.class);
     }
 
-    public void login(LoginRequest loginRequest) throws Exception {
-        var request = buildRequest("POST", "/session", loginRequest);
+    public LoginResult login(LoginRequest loginRequest) throws Exception {
+        var request = buildRequest("POST", "/session", loginRequest, null);
         var response = sendRequest(request);
-        handleResponse(response, LoginResult.class);
+        return handleResponse(response, LoginResult.class);
     }
 
-    public void logout(LogoutRequest logoutRequest) throws Exception {
-        var request = buildRequest("DELETE", "/session", logoutRequest);
-        sendRequest(request);
+    public void logout(LogoutRequest logoutRequest, String authToken) throws Exception {
+        var request = buildRequest("DELETE", "/session", logoutRequest, authToken);
+        var response = sendRequest(request);
+        handleResponse(response, null);
     }
 
-    public GameListResult listGames(GameListRequest gameListRequest) throws Exception {
-        var request = buildRequest("GET", "/game", gameListRequest);
+    public GameListResult listGames(GameListRequest gameListRequest, String authToken) throws Exception {
+        var request = buildRequest("GET", "/game", gameListRequest, authToken);
         var response = sendRequest(request);
         return handleResponse(response, GameListResult.class);
     }
 
-    public CreateGameResult createGame(GameListRequest gameListRequest) throws Exception {
-        var request = buildRequest("POST", "/game", gameListRequest);
+    public CreateGameResult createGame(CreateGameRequest createGameRequest, String authToken) throws Exception {
+        var request = buildRequest("POST", "/game", createGameRequest, authToken);
         var response = sendRequest(request);
         return handleResponse(response, CreateGameResult.class);
     }
 
-    public void joinGame(JoinGameRequest joinGameRequest) throws Exception {
-        var request = buildRequest("PUT", "/game", joinGameRequest);
-        sendRequest(request);
+    public void joinGame(JoinGameRequest joinGameRequest, String authToken) throws Exception {
+        var request = buildRequest("PUT", "/game", joinGameRequest, authToken);
+        var response = sendRequest(request);
+        handleResponse(response, null);
     }
 
     public void clear() throws Exception {
-        var request = buildRequest("DELETE", "/db", null);
+        var request = buildRequest("DELETE", "/db", null, null);
         sendRequest(request);
     }
 
-    private HttpRequest buildRequest(String method, String path, Object body) {
+    private HttpRequest buildRequest(String method, String path, Object body, String authToken) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverDomain + path))
                 .method(method, makeRequestBody(body));
         if (body != null) {
             request.setHeader("Content-Type", "application/json");
+        }
+        if (authToken != null) {
+            request.setHeader("authorization", authToken);
         }
         return request.build();
     }
@@ -83,20 +88,19 @@ public class ServerFacade {
         }
     }
 
-    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) {
+    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws Exception{
         var status = response.statusCode();
         if (!isSuccessful(status)) {
-            var body = response.body();
-            JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+            JsonObject json = JsonParser.parseString(response.body()).getAsJsonObject();
             String errorMessage = json.get("message").getAsString();
-            System.out.println(errorMessage);
+            throw new Exception(errorMessage);
         }
 
-        if (responseClass != null) {
-            return new Gson().fromJson(response.body(), responseClass);
+        if (responseClass == null) {
+            return null;
         }
 
-        return null;
+        return new Gson().fromJson(response.body(), responseClass);
     }
 
     private boolean isSuccessful(int status) {

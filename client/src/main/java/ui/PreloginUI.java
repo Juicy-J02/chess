@@ -49,11 +49,17 @@ public class PreloginUI {
                     else if (params.length > 2) {
                         System.out.print("too many inputs\n");
                     }
-                    else  {
+                    else {
                         String username = params[0];
                         String password = params[1];
-                        server.login(new LoginRequest(username, password));
-                        new PostloginUI(this.server).run();
+                        LoginResult loginResult;
+                        try {
+                            loginResult = server.login(new LoginRequest(username, password));
+                        } catch (Exception ex) {
+                            System.out.println(ex.getMessage());
+                            break;
+                        }
+                        new PostloginUI(this.server).run(loginResult.username(), loginResult.authToken());
                         break label;
                     }
                     break;
@@ -69,7 +75,15 @@ public class PreloginUI {
                         String username = params[0];
                         String password = params[1];
                         String email = params[2];
-                        server.register(new RegisterRequest(username, password, email));
+                        RegisterResult registerResult;
+                        try {
+                            registerResult = server.register(new RegisterRequest(username, password, email));
+                        } catch (Exception ex) {
+                            System.out.println(ex.getMessage());
+                            break;
+                        }
+                        new PostloginUI(this.server).run(registerResult.username(), registerResult.authToken());
+                        break label;
                     }
                     break;
 
