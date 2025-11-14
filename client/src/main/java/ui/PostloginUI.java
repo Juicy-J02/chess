@@ -97,8 +97,15 @@ public class PostloginUI {
                         System.out.print("too many inputs\n");
                     }
                     else {
-                        Integer gameID = Integer.parseInt(params[0]);
-                        String playerColor = params[1].toUpperCase();
+                        int gameID = 0;
+                        String playerColor = "";
+
+                        try {
+                            gameID = Integer.parseInt(params[0]);
+                            playerColor = params[1].toUpperCase();
+                        } catch (Exception ex) {
+                            System.out.println();
+                        }
                         try {
                             server.joinGame(new JoinGameRequest(playerColor, gameID), authToken);
                         } catch (Exception ex) {
