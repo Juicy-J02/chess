@@ -4,7 +4,6 @@ import model.GameData;
 import server.ServerFacade;
 import service.*;
 
-import java.awt.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +17,9 @@ public class PostloginUI {
     ServerFacade server;
     Map<Integer, GameData> gameNumberMap = new HashMap<>();
 
+    private static final String TOO_MANY_ERROR = "Too many inputs";
+    private static final String NOT_ENOUGH_ERROR = "Not enough inputs";
+    private static final String GAME_NUMBER_ERROR = "See game numbers from list";
 
     public PostloginUI(ServerFacade server)  {
         this.server = server;
@@ -36,7 +38,7 @@ public class PostloginUI {
 
             String line = scanner.nextLine();
             String[] tokens = line.toLowerCase().split(" ");
-            String cmd = tokens[0];
+            String cmd = tokens[0].toLowerCase();
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
 
             System.out.println();
@@ -66,137 +68,151 @@ public class PostloginUI {
                     break label;
 
                 case "list":
-                    try {
-                        int gameNumber = 0;
-                        GameListResult gameListResult = server.listGames(new GameListRequest(authToken), authToken);
-
-                        if (gameListResult.games().isEmpty()) {
-                            System.out.println("No games created");
-                        }
-
-                        for (GameData game : gameListResult.games()) {
-                            String gameName = game.getGameName();
-                            String whiteUsername = game.getWhiteUsername();
-                            if (whiteUsername == null) {
-                                whiteUsername = "";
-                            }
-                            String blackUsername = game.getBlackUsername();
-                            if (blackUsername == null) {
-                                blackUsername = "";
-                            }
-                            gameNumber += 1;
-
-                            gameNumberMap.put(gameNumber, game);
-
-                            System.out.println(gameNumber + ": " + gameName);
-                            System.out.println("White player: " + whiteUsername);
-                            System.out.println("Black player: " + blackUsername);
-                            if (gameNumber < gameListResult.games().toArray().length) {
-                                System.out.println();
-                            }
-                        }
-                        break;
-                    } catch (Exception ex) {
-                        System.out.println(ex.getMessage());
-                        break;
-                    }
+                    list(authToken);
+                    break;
 
                 case "create":
-                    if (params.length < 1) {
-                        System.out.println("Please input a game name");
-                    }
-                    else if (params.length > 1) {
-                        System.out.println("Too many inputs");
-                    }
-                    else {
-                        String gameName = params[0];
-                        try {
-                            server.createGame(new CreateGameRequest(gameName), authToken);
-                            System.out.println("Created game: " + gameName);
-                        } catch (Exception ex) {
-                            if (ex.getMessage().toLowerCase().contains("game already")) {
-                                System.out.println("Game already exists: " + gameName);
-                                break;
-                            }
-                        }
-                        break;
-                    }
+                    create(params, authToken);
                     break;
 
                 case "join":
-                    if (params.length < 2) {
-                        System.out.println("Please input a game ID and Player Color");
-                    }
-                    else if (params.length > 2) {
-                        System.out.println("Too many inputs");
-                    }
-                    else {
-                        GameData game;
-                        String playerColor;
-                        int gameNumber;
-
-                        try {
-                            gameNumber = Integer.parseInt(params[0]);
-                            playerColor = params[1].toUpperCase();
-                            game = gameNumberMap.get(gameNumber);
-
-                            if (game == null) {
-                                System.out.println("See game numbers from list");
-                                break;
-                            }
-                        } catch (Exception ex) {
-                            System.out.println("Join a game with <ID> [WHITE|BLACK]");
-                            break;
-                        }
-
-                        try {
-                            server.joinGame(new JoinGameRequest(playerColor, game.getGameID()), authToken);
-                            System.out.println("Joined Game " + gameNumber + " as " + playerColor);
-                            if (playerColor.equals("WHITE")) {
-                                new GameplayUI(this.server).run(game, "White");
-                            } else {
-                                new GameplayUI(this.server).run(game, "Black");
-                            }
-                        } catch (Exception ex) {
-                            System.out.println(ex.getMessage());
-                            break;
-                        }
-                        break;
-                    }
+                    join(params, authToken);
                     break;
 
                 case "observe":
-                    if (params.length < 1) {
-                        System.out.println("Please input a game number");
-                    }
-                    else if (params.length > 1) {
-                        System.out.println("Too many inputs");
-                    }
-                    else {
-                        GameData game;
-                        int gameNumber;
-
-                        try {
-                            gameNumber = Integer.parseInt(params[0]);
-                            game = gameNumberMap.get(gameNumber);
-
-                            if (game == null) {
-                                System.out.println("See game numbers from list");
-                                break;
-                            }
-
-                            new GameplayUI(this.server).run(game, "White");
-                        } catch (Exception ex) {
-                            System.out.println("Observe a game with <ID>");
-                            break;
-                        }
-                    }
+                    observe(params);
                     break;
 
                 default:
                     System.out.println("Unknown command: " + cmd);
                     System.out.println("See help for list of commands");
             }
+        }
+    }
+
+    private void list(String authToken) {
+        try {
+            int gameNumber = 0;
+            GameListResult gameListResult = server.listGames(new GameListRequest(authToken), authToken);
+
+            if (gameListResult.games().isEmpty()) {
+                System.out.println("No games created");
+            }
+
+            for (GameData game : gameListResult.games()) {
+                String gameName = game.getGameName();
+                String whiteUsername = game.getWhiteUsername();
+                if (whiteUsername == null) {
+                    whiteUsername = "";
+                }
+                String blackUsername = game.getBlackUsername();
+                if (blackUsername == null) {
+                    blackUsername = "";
+                }
+                gameNumber += 1;
+
+                gameNumberMap.put(gameNumber, game);
+
+                System.out.println(gameNumber + ": " + gameName);
+                System.out.println("White player: " + whiteUsername);
+                System.out.println("Black player: " + blackUsername);
+                if (gameNumber < gameListResult.games().toArray().length) {
+                    System.out.println();
+                }
+            }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    private void create(String[] params, String authToken) {
+        if (params.length < 1) {
+            System.out.println(NOT_ENOUGH_ERROR);
+            return;
+        }
+        if (params.length > 1) {
+            System.out.println(TOO_MANY_ERROR);
+            return;
+        }
+
+        String gameName = params[0];
+        try {
+            server.createGame(new CreateGameRequest(gameName), authToken);
+            System.out.println("Created game: " + gameName);
+        } catch (Exception ex) {
+            if (ex.getMessage().toLowerCase().contains("game already")) {
+                System.out.println("Game already exists: " + gameName);
+            }
+        }
+    }
+
+    private void join(String[] params, String authToken) {
+        if (params.length < 2) {
+            System.out.println(NOT_ENOUGH_ERROR);
+            return;
+        }
+        if (params.length > 2) {
+            System.out.println(TOO_MANY_ERROR);
+            return;
+        }
+
+        int gameNumber;
+        try {
+            gameNumber = Integer.parseInt(params[0]);
+        } catch (Exception ex) {
+            System.out.println("Join a game with <ID> [WHITE|BLACK]");
+            return;
+        }
+
+        String playerColor;
+        try {
+            playerColor = params[1].toUpperCase();
+        } catch (Exception ex) {
+            System.out.println("Join a game with <ID> [WHITE|BLACK]");
+            return;
+        }
+
+        GameData game = gameNumberMap.get(gameNumber);
+        if (game == null) {
+            System.out.println(GAME_NUMBER_ERROR);
+            return;
+        }
+
+        try {
+            server.joinGame(new JoinGameRequest(playerColor, game.getGameID()), authToken);
+            System.out.println("Joined Game " + gameNumber + " as " + playerColor);
+
+            new GameplayUI(this.server).run(game, playerColor.equals("WHITE") ? "White" : "Black");
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    private void observe(String[] params) {
+        if (params.length < 1) {
+            System.out.println(NOT_ENOUGH_ERROR);
+            return;
+        }
+        if (params.length > 1) {
+            System.out.println(TOO_MANY_ERROR);
+            return;
+        }
+
+        GameData game;
+        int gameNumber;
+
+        try {
+            gameNumber = Integer.parseInt(params[0]);
+            game = gameNumberMap.get(gameNumber);
+
+            if (game == null) {
+                System.out.println(GAME_NUMBER_ERROR);
+                return;
+            }
+
+            new GameplayUI(this.server).run(game, "White");
+        } catch (Exception ex) {
+            System.out.println("Observe a game with <ID>");
         }
     }
 }
