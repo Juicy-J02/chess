@@ -3,8 +3,8 @@ package service;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
-import model.AuthData;
-import model.GameData;
+import model.*;
+
 import java.util.List;
 
 public class GameService {

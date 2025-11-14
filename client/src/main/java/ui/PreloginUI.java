@@ -1,7 +1,10 @@
 package ui;
 
+import model.LoginRequest;
+import model.LoginResult;
+import model.RegisterRequest;
+import model.RegisterResult;
 import server.ServerFacade;
-import service.*;
 
 import java.util.Arrays;
 import java.util.Scanner;

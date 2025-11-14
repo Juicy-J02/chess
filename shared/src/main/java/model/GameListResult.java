@@ -1,6 +1,5 @@
-package service;
+package model;
 
-import model.GameData;
 import java.util.List;
 
 public record GameListResult(List<GameData> games) {}
