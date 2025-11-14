@@ -68,7 +68,7 @@ public class PreloginUI {
 
                 case "register":
                     if (params.length < 3) {
-                        System.out.println("Please input a username and password");
+                        System.out.println("Please input a username, password, and email");
                     }
                     else if (params.length > 3) {
                         System.out.println("Too many inputs");

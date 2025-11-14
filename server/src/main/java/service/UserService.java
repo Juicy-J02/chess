@@ -34,8 +34,12 @@ public class UserService {
     public LoginResult login(LoginRequest loginRequest) throws DataAccessException {
         UserData user = userDAO.getUserByUsername(loginRequest.username());
 
-        if (user == null || !BCrypt.checkpw(loginRequest.password(), user.getPassword())) {
-            throw new DataAccessException("Error: Incorrect username or password");
+        if (user == null) {
+            throw new DataAccessException("No user found");
+        }
+
+        if (!BCrypt.checkpw(loginRequest.password(), user.getPassword())) {
+            throw new DataAccessException("incorrect password");
         }
 
         AuthData authData = new AuthData(loginRequest.username());
