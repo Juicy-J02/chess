@@ -91,6 +91,7 @@ public class PreloginUI {
 
                 case "clear":
                     server.clear();
+                    System.out.println("Cleared database");
                     break;
 
                 default:
