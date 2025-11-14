@@ -84,7 +84,7 @@ public class ServerFacade {
         try {
             return client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (Exception ex) {
-            throw new Exception("Failed to send request: " + ex.getMessage());
+            throw new Exception("Failed to send request");
         }
     }
 

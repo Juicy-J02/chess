@@ -45,56 +45,13 @@ public class PreloginUI {
                     break;
 
                 case "login":
-                    if (params.length < 2) {
-                        System.out.println("Please input a username and password");
-                    }
-                    else if (params.length > 2) {
-                        System.out.println("Too many inputs");
-                    }
-                    else {
-                        String username = params[0];
-                        String password = params[1];
-                        LoginResult loginResult;
-                        try {
-                            loginResult = server.login(new LoginRequest(username, password));
-                        } catch (Exception ex) {
-                            if (ex.getMessage().toLowerCase().contains("incorrect")) {
-                                System.out.println("Password is incorrect for: " + username);
-                                break;
-                            }
-                            else if (ex.getMessage().toLowerCase().contains("no user")) {
-                                System.out.println("No username found for: " + username);
-                                break;
-                            }
-                            break;
-                        }
-                        new PostloginUI(this.server).run(loginResult.username(), loginResult.authToken());
+                    if (login(params)) {
                         break label;
                     }
                     break;
 
                 case "register":
-                    if (params.length < 3) {
-                        System.out.println("Please input a username, password, and email");
-                    }
-                    else if (params.length > 3) {
-                        System.out.println("Too many inputs");
-                    }
-                    else {
-                        String username = params[0];
-                        String password = params[1];
-                        String email = params[2];
-                        RegisterResult registerResult;
-                        try {
-                            registerResult = server.register(new RegisterRequest(username, password, email));
-                        } catch (Exception ex) {
-                            if (ex.getMessage().toLowerCase().contains("user already")) {
-                                System.out.println("Username taken");
-                                break;
-                            }
-                            break;
-                        }
-                        new PostloginUI(this.server).run(registerResult.username(), registerResult.authToken());
+                    if (register(params)) {
                         break label;
                     }
                     break;
@@ -109,5 +66,63 @@ public class PreloginUI {
                     System.out.println("See help for list of commands");
             }
         }
+    }
+
+    private boolean login(String[] params) throws Exception {
+        if (params.length < 2) {
+            System.out.println("Please input a username and password");
+            return false;
+        }
+        if (params.length > 2) {
+            System.out.println("Too many inputs");
+            return false;
+        }
+        String username = params[0];
+        String password = params[1];
+        LoginResult loginResult;
+        try {
+            loginResult = server.login(new LoginRequest(username, password));
+        } catch (Exception ex) {
+            if (ex.getMessage().toLowerCase().contains("incorrect")) {
+                System.out.println("Password is incorrect for: " + username);
+            }
+            else if (ex.getMessage().toLowerCase().contains("no user")) {
+                System.out.println("No username found for: " + username);
+            } else {
+                System.out.println("Login failed: " + ex.getMessage());
+            }
+            return false;
+        }
+        new PostloginUI(this.server).run(loginResult.username(), loginResult.authToken());
+        return true;
+    }
+
+    private boolean register(String[] params) throws Exception {
+        if (params.length < 3) {
+            System.out.println("Please input a username, password, and email");
+            return false;
+        }
+        if (params.length > 3) {
+            System.out.println("Too many inputs");
+            return false;
+        }
+        String username = params[0];
+        String password = params[1];
+        String email = params[2];
+
+        RegisterResult registerResult;
+
+        try {
+            registerResult = server.register(new RegisterRequest(username, password, email));
+        } catch (Exception ex) {
+            if (ex.getMessage().toLowerCase().contains("user already")) {
+                System.out.println("Username taken");
+            } else {
+                System.out.println("Registration failed: " + ex.getMessage());
+            }
+            return false;
+        }
+        new PostloginUI(this.server).run(registerResult.username(), registerResult.authToken());
+        return true;
     }
 }

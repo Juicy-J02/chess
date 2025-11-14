@@ -69,10 +69,21 @@ public class PostloginUI {
                     try {
                         int gameNumber = 0;
                         GameListResult gameListResult = server.listGames(new GameListRequest(authToken), authToken);
+
+                        if (gameListResult.games().isEmpty()) {
+                            System.out.println("No games created");
+                        }
+
                         for (GameData game : gameListResult.games()) {
                             String gameName = game.getGameName();
                             String whiteUsername = game.getWhiteUsername();
+                            if (whiteUsername == null) {
+                                whiteUsername = "";
+                            }
                             String blackUsername = game.getBlackUsername();
+                            if (blackUsername == null) {
+                                blackUsername = "";
+                            }
                             gameNumber += 1;
 
                             gameNumberMap.put(gameNumber, game);
@@ -80,7 +91,6 @@ public class PostloginUI {
                             System.out.println(gameNumber + ": " + gameName);
                             System.out.println("White player: " + whiteUsername);
                             System.out.println("Black player: " + blackUsername);
-                            System.out.println(game.getGame());
                             if (gameNumber < gameListResult.games().toArray().length) {
                                 System.out.println();
                             }
@@ -100,13 +110,14 @@ public class PostloginUI {
                     }
                     else {
                         String gameName = params[0];
-                        CreateGameResult createGameResult;
                         try {
-                            createGameResult = server.createGame(new CreateGameRequest(gameName), authToken);
-                            System.out.println("Created game " + gameName + " ID: " + createGameResult.gameID());
+                            server.createGame(new CreateGameRequest(gameName), authToken);
+                            System.out.println("Created game: " + gameName);
                         } catch (Exception ex) {
-                            System.out.println(ex.getMessage());
-                            break;
+                            if (ex.getMessage().toLowerCase().contains("game already")) {
+                                System.out.println("Game already exists: " + gameName);
+                                break;
+                            }
                         }
                         break;
                     }
