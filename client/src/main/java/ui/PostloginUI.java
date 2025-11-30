@@ -22,7 +22,6 @@ public class PostloginUI {
     }
 
     public void run(String username, String authToken) throws Exception {
-
         Scanner scanner = new Scanner(System.in);
 
         label:
