@@ -8,9 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-import static ui.EscapeSequences.BLACK_KING;
-import static ui.EscapeSequences.WHITE_KING;
-
 public class PostloginUI {
 
     ServerFacade server;
@@ -26,8 +23,6 @@ public class PostloginUI {
 
     public void run(String username, String authToken) throws Exception {
 
-        System.out.print(BLACK_KING + "Logged in as " + username + WHITE_KING + "\n");
-
         Scanner scanner = new Scanner(System.in);
 
         label:
@@ -37,7 +32,7 @@ public class PostloginUI {
 
             String line = scanner.nextLine();
             String[] tokens = line.toLowerCase().split(" ");
-            String cmd = tokens[0].toLowerCase();
+            String cmd = tokens[0];
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
 
             System.out.println();
@@ -75,11 +70,11 @@ public class PostloginUI {
                     break;
 
                 case "join":
-                    join(params, authToken);
+                    join(params, authToken, username);
                     break;
 
                 case "observe":
-                    observe(params);
+                    observe(params, username, authToken);
                     break;
 
                 default:
@@ -145,7 +140,7 @@ public class PostloginUI {
         }
     }
 
-    private void join(String[] params, String authToken) {
+    private void join(String[] params, String authToken, String username) {
         if (params.length < 2) {
             System.out.println(NOT_ENOUGH_ERROR);
             return;
@@ -181,13 +176,14 @@ public class PostloginUI {
             server.joinGame(new JoinGameRequest(playerColor, game.getGameID()), authToken);
             System.out.println("Joined Game " + gameNumber + " as " + playerColor);
 
-            new GameplayUI(this.server).run(game, playerColor.equals("WHITE") ? "White" : "Black");
+            new GameplayUI(this.server).run(game, playerColor.equals("WHITE") ? "White" : "Black", gameNumber,
+                    username, authToken);
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
     }
 
-    private void observe(String[] params) {
+    private void observe(String[] params, String username, String authToken) {
         if (params.length < 1) {
             System.out.println(NOT_ENOUGH_ERROR);
             return;
@@ -209,7 +205,7 @@ public class PostloginUI {
                 return;
             }
 
-            new GameplayUI(this.server).run(game, "White");
+            new GameplayUI(this.server).run(game, "White", gameNumber, username, authToken);
         } catch (Exception ex) {
             System.out.println("Observe a game with <ID>");
         }

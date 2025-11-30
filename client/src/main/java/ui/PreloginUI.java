@@ -99,6 +99,7 @@ public class PreloginUI {
             }
             return false;
         }
+        System.out.print(BLACK_KING + "Logged in as " + username + WHITE_KING + "\n");
         new PostloginUI(this.server).run(loginResult.username(), loginResult.authToken());
         return true;
     }
