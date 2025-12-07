@@ -47,4 +47,20 @@ public class ServerFacade {
         String message = new Gson().toJson(userGameCommand);
         websocketCommunicator.sendCommand(message);
     }
+
+    public void connect(String authToken, Integer gameID) {
+        sendCommand(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID));
+    }
+
+    public void makeMove(String authToken, Integer gameID) {
+        sendCommand(new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID));
+    }
+
+    public void leave(String authToken, Integer gameID) {
+        sendCommand(new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID));
+    }
+
+    public void resign(String authToken, Integer gameID) {
+        sendCommand(new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID));
+    }
 }

@@ -1,54 +1,54 @@
 package server;
 
-import com.google.gson.Gson;
-import jakarta.websocket.*;
-
 import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.WebSocket;
+import java.net.http.WebSocket.Listener;
+import java.util.concurrent.CompletionStage;
+import com.google.gson.Gson;
 
-@ClientEndpoint
 public class WebsocketCommunicator {
 
-    private Session session;
-    private WebsocketMessageListener listener;
+    private WebSocket webSocket;
     private final Gson gson = new Gson();
 
     public WebsocketCommunicator(String serverUrl) {
-        try {
-            URI uri = new URI(serverUrl.replace("http", "ws") + "/ws");
-            WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-            this.session = container.connectToServer(this, uri);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+        HttpClient client = HttpClient.newHttpClient();
 
-    @OnOpen
-    public void onOpen(Session session) {
-        System.out.println("[WebSocket] Connected.");
-        this.session = session;
-    }
+        client.newWebSocketBuilder()
+                .buildAsync(URI.create(serverUrl.replace("http", "ws") + "/ws"), new Listener() {
 
-    @OnMessage
-    public void onMessage(String message) {
-        if (listener != null) {
-            listener.onMessage(message);
-        }
-    }
+                    @Override
+                    public void onOpen(WebSocket ws) {
+                        System.out.println("Connected to WebSocket server!");
+                        WebsocketCommunicator.this.webSocket = ws;
+                        Listener.super.onOpen(ws);
+                    }
 
-    public void setListener(WebsocketMessageListener listener) {
-        this.listener = listener;
+                    @Override
+                    public CompletionStage<?> onText(WebSocket ws, CharSequence data, boolean last) {
+                        System.out.println("Received message: " + data);
+                        return Listener.super.onText(ws, data, last);
+                    }
+
+                    @Override
+                    public CompletionStage<?> onClose(WebSocket ws, int statusCode, String reason) {
+                        System.out.println("WebSocket closed: " + statusCode + " - " + reason);
+                        return Listener.super.onClose(ws, statusCode, reason);
+                    }
+
+                    @Override
+                    public void onError(WebSocket ws, Throwable error) {
+                        System.err.println("WebSocket error: " + error.getMessage());
+                        Listener.super.onError(ws, error);
+                    }
+                });
     }
 
     public void sendCommand(Object command) {
-        try {
+        if (webSocket != null) {
             String json = gson.toJson(command);
-            session.getBasicRemote().sendText(json);
-        } catch (Exception e) {
-            e.printStackTrace();
+            webSocket.sendText(json, true);
         }
-    }
-
-    public interface WebsocketMessageListener {
-        void onMessage(String message);
     }
 }
