@@ -175,6 +175,9 @@ public class PostloginUI {
             server.joinGame(new JoinGameRequest(playerColor, game.getGameID()), authToken);
             System.out.println("Joined Game " + gameNumber + " as " + playerColor);
 
+            server.connectWebsocket();
+            server.connect(authToken, game.getGameID());
+
             new GameplayUI(this.server).run(game, playerColor.equals("WHITE") ? "White" : "Black", gameNumber,
                     username, authToken);
         } catch (Exception ex) {
@@ -203,6 +206,9 @@ public class PostloginUI {
                 System.out.println(GAME_NUMBER_ERROR);
                 return;
             }
+
+            server.connectWebsocket();
+            server.connect(authToken, game.getGameID());
 
             new GameplayUI(this.server).run(game, "White", gameNumber, username, authToken);
         } catch (Exception ex) {

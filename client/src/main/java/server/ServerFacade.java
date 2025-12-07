@@ -1,6 +1,5 @@
 package server;
 
-import chess.ChessGame;
 import com.google.gson.Gson;
 import model.*;
 import websocket.commands.UserGameCommand;
@@ -8,11 +7,12 @@ import websocket.commands.UserGameCommand;
 public class ServerFacade {
 
     private final HttpCommunicator httpCommunicator;
-    private final WebsocketCommunicator websocketCommunicator;
+    WebsocketCommunicator websocketCommunicator;
+    String url;
 
     public ServerFacade(String url) {
         this.httpCommunicator = new HttpCommunicator(url);
-        this.websocketCommunicator = new WebsocketCommunicator(url);
+        this.url = url;
     }
 
     public RegisterResult register(RegisterRequest registerRequest) throws Exception {
@@ -41,6 +41,10 @@ public class ServerFacade {
 
     public void clear() throws Exception {
         httpCommunicator.clear();
+    }
+
+    public void connectWebsocket() {
+        websocketCommunicator =  new WebsocketCommunicator(url);
     }
 
     public void sendMessage(UserGameCommand userGameCommand) {
