@@ -3,6 +3,7 @@ package server;
 import dataaccess.*;
 import io.javalin.Javalin;
 import io.javalin.json.JavalinGson;
+import io.javalin.websocket.WsConnectContext;
 import service.ClearService;
 import service.GameService;
 import service.UserService;
@@ -25,7 +26,8 @@ public class Server {
         GameHandler gameHandler = new GameHandler(gameService);
         ClearHandler clearHandler = new ClearHandler(clearService);
 
-        WebsocketHandler websocketHandler = new WebsocketHandler();
+        ConnectionManager connectionManager = new ConnectionManager();
+        WebsocketHandler websocketHandler = new WebsocketHandler(connectionManager);
 
         javalin = Javalin.create(config -> {
             config.staticFiles.add("web");
@@ -42,10 +44,10 @@ public class Server {
 
         javalin.delete("/db", clearHandler::clearDatabase);
 
-        javalin.ws("/connect", wsConfig -> {
-            wsConfig.onConnect(websocketHandler);
-            wsConfig.onMessage(websocketHandler);
-            wsConfig.onClose(websocketHandler);
+        javalin.ws("/ws", ws -> {
+            ws.onConnect(websocketHandler);
+            ws.onMessage(websocketHandler);
+            ws.onClose(websocketHandler);
         });
     }
 

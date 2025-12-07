@@ -1,9 +1,14 @@
 package ui;
 
 import chess.*;
+import com.google.gson.Gson;
 import model.GameData;
 import server.ServerFacade;
 import server.WebsocketCommunicator;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 
 import java.util.Scanner;
 
@@ -22,11 +27,11 @@ public class GameplayUI {
         switch (boardView) {
 
             case "White":
-                printBoard(game, false);
+                printBoard(game.getGame(), false);
                 break;
 
             case "Black":
-                printBoard(game, true);
+                printBoard(game.getGame(), true);
                 break;
         }
 
@@ -56,11 +61,11 @@ public class GameplayUI {
                     switch (boardView) {
 
                         case "White":
-                            printBoard(game, false);
+                            printBoard(game.getGame(), false);
                             break;
 
                         case "Black":
-                            printBoard(game, true);
+                            printBoard(game.getGame(), true);
                             break;
                     }
                     break;
@@ -88,7 +93,7 @@ public class GameplayUI {
         }
     }
 
-    private void printBoard(GameData game, boolean flip) {
+    private void printBoard(ChessGame game, boolean flip) {
         columnHeader(flip);
 
         for (int i = 8; i >= 1; i--) {
@@ -98,7 +103,7 @@ public class GameplayUI {
             for (int j = 1; j <= 8; j++) {
                 int col = flip ? 9 - j : j;
                 ChessPosition pos = new ChessPosition(row, col);
-                ChessPiece piece = game.getGame().getBoard().getPiece(pos);
+                ChessPiece piece = game.getBoard().getPiece(pos);
 
                 boolean isLight = (row + col) % 2 == 0;
                 String bg = isLight ? EscapeSequences.SET_BG_COLOR_DARK_GREY : EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
@@ -131,5 +136,29 @@ public class GameplayUI {
             case KNIGHT -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.BLACK_KNIGHT : EscapeSequences.WHITE_KNIGHT;
             case PAWN -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.BLACK_PAWN : EscapeSequences.WHITE_PAWN;
         };
+    }
+
+    private void handleServerMessage(String json) {
+        Gson gson = new Gson();
+        ServerMessage serverMessage = gson.fromJson(json, ServerMessage.class);
+
+        switch (serverMessage.getServerMessageType()) {
+
+            case LOAD_GAME -> {
+                LoadGameMessage msg = gson.fromJson(json, LoadGameMessage.class);
+
+                printBoard(msg.getGame(), msg.getGame().getTeamTurn().equals(ChessGame.TeamColor.BLACK));
+            }
+
+            case NOTIFICATION -> {
+                NotificationMessage msg = gson.fromJson(json, NotificationMessage.class);
+                System.out.println("[SERVER NOTICE] " + msg.getNotification());
+            }
+
+            case ERROR -> {
+                ErrorMessage msg = gson.fromJson(json, ErrorMessage.class);
+                System.out.println("[SERVER ERROR] " + msg.getError());
+            }
+        }
     }
 }

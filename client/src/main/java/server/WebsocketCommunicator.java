@@ -8,23 +8,15 @@ import java.net.URI;
 @ClientEndpoint
 public class WebsocketCommunicator {
 
-    ServerFacade serverFacade;
     private Session session;
+    private WebsocketMessageListener listener;
     private final Gson gson = new Gson();
 
-    public WebsocketCommunicator(ServerFacade serverFacade, String serverUrl) {
+    public WebsocketCommunicator(String serverUrl) {
         try {
             URI uri = new URI(serverUrl.replace("http", "ws") + "/ws");
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, uri);
-
-            this.session.addMessageHandler(new MessageHandler.Whole<String>() {
-                @Override
-                public void onMessage(String message) {
-                    handleMessage(message);
-                }
-            });
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -32,17 +24,27 @@ public class WebsocketCommunicator {
 
     @OnOpen
     public void onOpen(Session session) {
+        System.out.println("[WebSocket] Connected.");
+        this.session = session;
     }
 
+    @OnMessage
+    public void onMessage(String message) {
+        if (listener != null) {
+            listener.onMessage(message);
+        }
+    }
 
-    public void handleMessage(String message) {
-        if (session != null && session.isOpen()) {
-            try {
-                String json = gson.toJson(message);
-                session.getBasicRemote().sendText(json);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+    public void setListener(WebsocketMessageListener listener) {
+        this.listener = listener;
+    }
+
+    public void sendCommand(Object command) {
+        try {
+            String json = gson.toJson(command);
+            session.getBasicRemote().sendText(json);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

@@ -1,32 +1,24 @@
 package server;
 
-
-import com.google.gson.Gson;
-import org.eclipse.jetty.websocket.api.Session;
-import java.io.IOException;
+import io.javalin.websocket.WsContext;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
 
-    private final ConcurrentHashMap<Session, Session> connections = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, WsContext> connections = new ConcurrentHashMap<>();
 
-    public void add(Session session) {
-        connections.put(session, session);
+    public void add(String authToken, WsContext ctx) {
+        connections.put(authToken, ctx);
     }
 
-    public void remove(Session session) {
-        connections.remove(session);
+    public void remove(String authToken) {
+        connections.remove(authToken);
     }
 
-    public void broadcast(String message) {
-        for (Session session : connections.values()) {
-            if (session.isOpen()) {
-                try {
-                    session.getRemote().sendString(new Gson().toJson(message));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+    public void broadcast(String authToken, String message) {
+        WsContext ctx = connections.get(authToken);
+        if (ctx != null && ctx.session.isOpen()) {
+            ctx.send(message);
         }
     }
 }

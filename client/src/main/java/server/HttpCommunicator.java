@@ -10,13 +10,11 @@ import java.net.http.*;
 import java.net.http.HttpClient;
 
 public class HttpCommunicator {
-
-    ServerFacade serverFacade;
+    ;
     private final HttpClient client = HttpClient.newHttpClient();
     private final String serverDomain;
 
-    public HttpCommunicator(ServerFacade serverFacade, String url) {
-        this.serverFacade = serverFacade;
+    public HttpCommunicator(String url) {
         this.serverDomain = url;
     }
 

@@ -2,58 +2,84 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
-import io.javalin.websocket.WsCloseContext;
-import io.javalin.websocket.WsCloseHandler;
-import io.javalin.websocket.WsConnectContext;
-import io.javalin.websocket.WsConnectHandler;
-import io.javalin.websocket.WsMessageContext;
-import io.javalin.websocket.WsMessageHandler;
-import org.eclipse.jetty.websocket.api.Session;
-import jakarta.websocket.*;
+import io.javalin.websocket.*;
+import org.jetbrains.annotations.NotNull;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessage;
+import websocket.messages.NotificationMessage;
 
 public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
-    private final ConnectionManager connections = new ConnectionManager();
+    private final ConnectionManager connections;
+
+    public WebsocketHandler(ConnectionManager connections) {
+        this.connections = connections;
+    }
 
     @Override
     public void handleConnect(WsConnectContext ctx) {
-        System.out.println("Websocket connected");
         ctx.enableAutomaticPings();
     }
 
     @Override
-    public void handleMessage(WsMessageContext ctx) throws DataAccessException {
-        UserGameCommand userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
-        switch (userGameCommand.getCommandType()) {
-            case CONNECT -> {
-                System.out.println("CONNECT");
-                 connect(userGameCommand, ctx.session);
-            }
-            case LEAVE -> {
-                System.out.println("LEAVE");
-                leave(userGameCommand, ctx.session);
-            }
-            case MAKE_MOVE -> {
-                System.out.println("MAKE_MOVE");
-            }
-        }
+    public void handleClose(@NotNull WsCloseContext ctx) {
     }
 
     @Override
-    public void handleClose(WsCloseContext ctx) {
-        System.out.println("Websocket closed");
+    public void handleMessage(@NotNull WsMessageContext ctx) {
+        UserGameCommand userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+        try {
+            switch (userGameCommand.getCommandType()) {
+                case CONNECT -> connect(userGameCommand, ctx);
+                case LEAVE -> leave(userGameCommand);
+                case RESIGN -> resign(userGameCommand);
+                case MAKE_MOVE -> makeMove(userGameCommand);
+            }
+        } catch (Exception e) {
+            error(userGameCommand, e.getMessage());
+        }
     }
 
-    private void connect(UserGameCommand userGameCommand, Session session) throws DataAccessException {
-        connections.add(session);
-        var message = String.format(userGameCommand.getUsername() + "entered game " + userGameCommand.getGameID());
-        connections.broadcast(message);
+    private void connect(UserGameCommand userGameCommand, WsContext ctx) throws DataAccessException {
+        connections.add(userGameCommand.getAuthToken(), ctx);
+
+        String message = userGameCommand.getUsername() + " has joined the game";
+        NotificationMessage notificationMessage = new NotificationMessage(message);
+
+        String json = new Gson().toJson(notificationMessage);
+        connections.broadcast(userGameCommand.getAuthToken(), json);
     }
 
-    private void leave(UserGameCommand userGameCommand, Session session) throws DataAccessException {
-        connections.remove(session);
-        var message = String.format(userGameCommand.getUsername() + "left game " + userGameCommand.getGameID());
-        connections.broadcast(message);
+    private void leave(UserGameCommand userGameCommand) throws DataAccessException {
+        String message = userGameCommand.getUsername() + " has left the game";
+        NotificationMessage notificationMessage = new NotificationMessage(message);
+
+        String json = new Gson().toJson(notificationMessage);
+        connections.broadcast(userGameCommand.getAuthToken(), json);
+
+        connections.remove(userGameCommand.getAuthToken());
     }
+
+    private void resign(UserGameCommand userGameCommand) throws DataAccessException {
+        String message = userGameCommand.getUsername() + " has resigned";
+        NotificationMessage notificationMessage = new NotificationMessage(message);
+
+        String json = new Gson().toJson(notificationMessage);
+        connections.broadcast(userGameCommand.getAuthToken(), json);
+    }
+
+    private void makeMove(UserGameCommand userGameCommand) throws DataAccessException {
+        String message = userGameCommand.getUsername() + " made move";
+        NotificationMessage notificationMessage = new NotificationMessage(message);
+
+        String json = new Gson().toJson(notificationMessage);
+        connections.broadcast(userGameCommand.getAuthToken(), json);
+    }
+
+    private void error(UserGameCommand userGameCommand, String errorMessage) {
+        ErrorMessage error = new ErrorMessage(errorMessage);
+        String json = new Gson().toJson(error);
+        connections.broadcast(userGameCommand.getAuthToken(), json);
+    }
+
 }
