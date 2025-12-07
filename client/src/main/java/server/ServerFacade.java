@@ -43,24 +43,24 @@ public class ServerFacade {
         httpCommunicator.clear();
     }
 
-    public void sendCommand(UserGameCommand userGameCommand) {
+    public void sendMessage(UserGameCommand userGameCommand) {
         String message = new Gson().toJson(userGameCommand);
-        websocketCommunicator.sendCommand(message);
+        websocketCommunicator.sendMessage(message);
     }
 
     public void connect(String authToken, Integer gameID) {
-        sendCommand(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID));
+        sendMessage(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID));
     }
 
     public void makeMove(String authToken, Integer gameID) {
-        sendCommand(new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID));
+        sendMessage(new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID));
     }
 
     public void leave(String authToken, Integer gameID) {
-        sendCommand(new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID));
+        sendMessage(new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID));
     }
 
     public void resign(String authToken, Integer gameID) {
-        sendCommand(new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID));
+        sendMessage(new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID));
     }
 }

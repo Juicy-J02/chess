@@ -8,6 +8,7 @@ import java.net.http.WebSocket;
 import com.google.gson.Gson;
 import jakarta.websocket.*;
 import ui.GameplayUI;
+import ui.PrintBoard;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
@@ -44,6 +45,7 @@ public class WebsocketCommunicator extends Endpoint {
         ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
         if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
             LoadGameMessage loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
+            new PrintBoard().printBoard(loadGameMessage.getGame(), true);
         }
         else if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.ERROR) {
             ErrorMessage errorMessage = new Gson().fromJson(message, ErrorMessage.class);
