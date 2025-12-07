@@ -24,7 +24,6 @@ public class PostloginUI {
     public void run(String username, String authToken) throws Exception {
         Scanner scanner = new Scanner(System.in);
 
-        label:
         while(true) {
 
             System.out.print("\n" + "[LOGGED IN]" + " >>> ");
@@ -38,7 +37,7 @@ public class PostloginUI {
 
             switch (cmd) {
                 case "quit":
-                    break label;
+                    return;
 
                 case "help":
                     System.out.println("   create <NAME> - a game");
@@ -58,7 +57,7 @@ public class PostloginUI {
                         break;
                     }
                     new PreloginUI(this.server).run();
-                    break label;
+                    return;
 
                 case "list":
                     list(authToken);

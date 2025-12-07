@@ -27,7 +27,6 @@ public class PreloginUI {
         System.out.print(BLACK_KING + "Welcome to 240 chess. Type Help to get started." + WHITE_KING + "\n");
         Scanner scanner = new Scanner(System.in);
 
-        label:
         while(true) {
 
             System.out.print("\n" + "[LOGGED OUT]" + " >>> ");
@@ -41,7 +40,7 @@ public class PreloginUI {
 
             switch (cmd) {
                 case "quit":
-                    break label;
+                    return;
 
                 case "help":
                     System.out.println("   register <USERNAME> <PASSWORD> <EMAIL> - to create an account");
@@ -52,13 +51,13 @@ public class PreloginUI {
 
                 case "login":
                     if (login(params)) {
-                        break label;
+                        return;
                     }
                     break;
 
                 case "register":
                     if (register(params)) {
-                        break label;
+                        return;
                     }
                     break;
 

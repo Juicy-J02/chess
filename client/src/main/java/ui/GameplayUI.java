@@ -1,14 +1,8 @@
 package ui;
 
 import chess.*;
-import com.google.gson.Gson;
 import model.GameData;
 import server.ServerFacade;
-import websocket.messages.ErrorMessage;
-import websocket.messages.LoadGameMessage;
-import websocket.messages.NotificationMessage;
-import websocket.messages.ServerMessage;
-
 import java.util.Scanner;
 
 public class GameplayUI {
@@ -16,11 +10,12 @@ public class GameplayUI {
     ServerFacade server;
     PrintBoard printBoard;
 
-    public GameplayUI(ServerFacade server)  {
+    public GameplayUI(ServerFacade server) {
         this.server = server;
+        this.printBoard = new PrintBoard();
     }
 
-    public void run(GameData game, String boardView, Integer gameNumber, String username, String authToken) throws Exception {
+    public void run(GameData game, String boardView, Integer gameNumber, String username, String authToken) {
 
         switch (boardView) {
 
@@ -35,27 +30,24 @@ public class GameplayUI {
 
         Scanner scanner = new Scanner(System.in);
 
-        label:
-        while(true) {
+        while (true) {
 
-            System.out.print("\n" + "[GAMEPLAY OF " + gameNumber + "]" + " >>> ");
+            System.out.print("\n" + "[GAMEPLAY]" + " >>> ");
 
             String line = scanner.nextLine();
-
-            System.out.println();
 
             switch (line) {
 
                 case "help":
                     System.out.println("   help - with possible commands");
-                    System.out.println("   redraw chess board - to redraw chess board");
+                    System.out.println("   redraw - to redraw chess board");
                     System.out.println("   leave - to leave the game");
-                    System.out.println("   make move - input a chess move");
+                    System.out.println("   move - input a chess move");
                     System.out.println("   resign - forfeit the game");
-                    System.out.println("   highlight legal moves - highlights available moves");
+                    System.out.println("   highlight - highlights available moves");
                     break;
 
-                case "redraw chess board":
+                case "redraw":
                     switch (boardView) {
 
                         case "White":
@@ -69,10 +61,10 @@ public class GameplayUI {
                     break;
 
                 case "leave":
-                    new PostloginUI(this.server).run(username, authToken);
-                    break label;
+                    server.leave(authToken, game.getGameID());
+                    return;
 
-                case "make move":
+                case "move":
                     System.out.println("WIP");
                     break;
 
@@ -80,7 +72,7 @@ public class GameplayUI {
                     System.out.println("WIP");
                     break;
 
-                case "highlight legal moves":
+                case "highlight":
                     System.out.println("WIP");
                     break;
 

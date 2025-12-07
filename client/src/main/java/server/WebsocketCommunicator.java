@@ -3,11 +3,9 @@ package server;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.http.WebSocket;
 
 import com.google.gson.Gson;
 import jakarta.websocket.*;
-import ui.GameplayUI;
 import ui.PrintBoard;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
@@ -44,16 +42,26 @@ public class WebsocketCommunicator extends Endpoint {
     private void handleMessage(String message) {
         ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
         if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
+            System.out.print("\r\033[2K");
             LoadGameMessage loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
             new PrintBoard().printBoard(loadGameMessage.getGame(), true);
+            System.out.print("\n" + "[GAMEPLAY] >>> ");
         }
         else if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.ERROR) {
+            System.out.print("\r\033[2K");
             ErrorMessage errorMessage = new Gson().fromJson(message, ErrorMessage.class);
-            System.out.println("Error: " + errorMessage.getError());
+            System.out.println(errorMessage.getError());
+            System.out.print("\n" + "[GAMEPLAY] >>> ");
         }
         else if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
+            System.out.print("\r\033[2K");
             NotificationMessage notificationMessage = new Gson().fromJson(message, NotificationMessage.class);
             System.out.println(notificationMessage.getNotification());
+            if (!notificationMessage.getNotification().contains("left")) {
+                System.out.print("\n" + "[GAMEPLAY] >>> ");
+            } else {
+                System.out.print("\n" + "[LOGGED IN] >>> ");
+            }
         }
     }
 
