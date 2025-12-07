@@ -3,15 +3,18 @@ package ui;
 import chess.*;
 import model.GameData;
 import server.ServerFacade;
+import server.WebsocketCommunicator;
 
 import java.util.Scanner;
 
 public class GameplayUI {
 
     ServerFacade server;
+    WebsocketCommunicator ws;
 
-    public GameplayUI(ServerFacade server)  {
+    public GameplayUI(ServerFacade server, WebsocketCommunicator ws)  {
         this.server = server;
+        this.ws = ws;
     }
 
     public void run(GameData game, String boardView, Integer gameNumber, String username, String authToken) throws Exception {

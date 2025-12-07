@@ -1,5 +1,9 @@
 package websocket.commands;
 
+import dataaccess.AuthDataAccessSQL;
+import dataaccess.DataAccessException;
+import model.AuthData;
+
 import java.util.Objects;
 
 /**
@@ -39,6 +43,12 @@ public class UserGameCommand {
 
     public Integer getGameID() {
         return gameID;
+    }
+
+    public String getUsername() throws DataAccessException {
+        AuthDataAccessSQL authDataAccessSQL = new AuthDataAccessSQL();
+        AuthData authData = authDataAccessSQL.getAuthByToken(authToken);
+        return authData.getUsername();
     }
 
     @Override

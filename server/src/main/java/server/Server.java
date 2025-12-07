@@ -25,6 +25,8 @@ public class Server {
         GameHandler gameHandler = new GameHandler(gameService);
         ClearHandler clearHandler = new ClearHandler(clearService);
 
+        WebsocketHandler websocketHandler = new WebsocketHandler();
+
         javalin = Javalin.create(config -> {
             config.staticFiles.add("web");
             config.jsonMapper(new JavalinGson());
@@ -39,6 +41,12 @@ public class Server {
         javalin.put("/game", gameHandler::joinGame);
 
         javalin.delete("/db", clearHandler::clearDatabase);
+
+        javalin.ws("/connect", wsConfig -> {
+            wsConfig.onConnect(websocketHandler);
+            wsConfig.onMessage(websocketHandler);
+            wsConfig.onClose(websocketHandler);
+        });
     }
 
     public int run(int desiredPort) {
