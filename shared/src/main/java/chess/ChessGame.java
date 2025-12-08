@@ -14,6 +14,7 @@ public class ChessGame {
 
     private TeamColor turn;
     private ChessBoard board;
+    private boolean gameOver;
 
     public ChessGame() {
         this.board = new ChessBoard();
@@ -43,6 +44,14 @@ public class ChessGame {
     public enum TeamColor {
         WHITE,
         BLACK
+    }
+
+    public void setGameOver(boolean gameOver) {
+        this.gameOver = gameOver;
+    }
+
+    public boolean getGameOver() {
+        return gameOver;
     }
 
     /**
@@ -93,16 +102,16 @@ public class ChessGame {
         ChessPiece piece = board.getPiece(start);
 
         if (piece == null) {
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("No piece");
         }
 
         if (piece.getTeamColor() != turn) {
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("Incorrect team");
         }
 
         Collection<ChessMove> moves = validMoves(start);
         if (moves == null || !moves.contains(move)) {
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("No moves");
         }
 
         board.removePiece(start);

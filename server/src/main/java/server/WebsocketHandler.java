@@ -1,10 +1,12 @@
 package server;
 
+import chess.ChessGame;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.*;
 import io.javalin.websocket.*;
 import model.GameData;
+import model.JoinGameRequest;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
@@ -39,7 +41,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             switch (userGameCommand.getCommandType()) {
                 case CONNECT -> connect(userGameCommand, ctx);
                 case LEAVE -> leave(userGameCommand, ctx);
-                case RESIGN -> resign(userGameCommand);
+                case RESIGN -> resign(userGameCommand, ctx);
                 case MAKE_MOVE -> {
                     MakeMoveCommand makeMoveCommand = gson.fromJson(ctx.message(), MakeMoveCommand.class);
                     makeMove(userGameCommand, makeMoveCommand, ctx);
@@ -58,7 +60,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         GameData gameData = gameDAO.getGame(userGameCommand.getGameID());
 
         if (gameData == null) {
-            ErrorMessage error = new ErrorMessage("Invalid game ID");
+            ErrorMessage error = new ErrorMessage("Invalid gameID");
             ctx.send(gson.toJson(error));
             return;
         }
@@ -78,33 +80,94 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void leave(UserGameCommand userGameCommand, WsContext ctx) throws DataAccessException, IOException {
+        GameDAO gameDAO = new GameDataAccessSQL();
+        gameDAO.joinGame(userGameCommand.getGameID(), null, userGameCommand.getTeamColor());
+
         String message = userGameCommand.getUsername() + " has left the game";
         NotificationMessage notificationMessage = new NotificationMessage(message);
 
-        connections.broadcast(userGameCommand.getGameID(), gson.toJson(notificationMessage));
+        connections.broadcastExcept(userGameCommand.getGameID(), gson.toJson(notificationMessage), ctx);
         connections.remove(userGameCommand.getGameID(), ctx);
     }
 
-    private void resign(UserGameCommand userGameCommand) throws DataAccessException, IOException {
-        String message = userGameCommand.getUsername() + " has resigned";
-        NotificationMessage notificationMessage = new NotificationMessage(message);
-
-        connections.broadcast(userGameCommand.getGameID(), gson.toJson(notificationMessage));
-    }
-
-    private void makeMove(UserGameCommand userGameCommand, MakeMoveCommand makeMoveCommand, WsContext ctx) throws DataAccessException, IOException, InvalidMoveException {
+    private void resign(UserGameCommand userGameCommand, WsContext ctx) throws DataAccessException, IOException {
         GameDAO gameDAO = new GameDataAccessSQL();
-        GameData gameData = gameDAO.getGame(makeMoveCommand.getGameID());
+        GameData gameData = gameDAO.getGame(userGameCommand.getGameID());
 
-        gameData.getGame().makeMove(makeMoveCommand.getMove());
+        if (gameData.getGame().getGameOver()) {
+            ErrorMessage error = new ErrorMessage("Game is already over");
+            ctx.send(gson.toJson(error));
+            return;
+        }
+
+        boolean isWhite = userGameCommand.getUsername().equals(gameData.getWhiteUsername());
+        boolean isBlack = userGameCommand.getUsername().equals(gameData.getBlackUsername());
+
+        if (!isWhite && !isBlack) {
+            ErrorMessage error = new ErrorMessage("Observers cannot resign");
+            ctx.send(gson.toJson(error));
+            return;
+        }
+
+        gameData.getGame().setGameOver(true);
         gameDAO.updateGame(gameData);
 
+
+        String message = userGameCommand.getUsername() + " has resigned";
+        NotificationMessage notificationMessage = new NotificationMessage(message);
+        connections.broadcast(gameData.getGameID(), gson.toJson(notificationMessage));
+    }
+
+    private void makeMove(UserGameCommand userGameCommand, MakeMoveCommand makeMoveCommand, WsContext ctx)
+            throws DataAccessException, IOException {
+
+        GameDAO gameDAO = new GameDataAccessSQL();
+        AuthDAO authDAO = new AuthDataAccessSQL();
+        GameData gameData = gameDAO.getGame(makeMoveCommand.getGameID());
+
+        if (authDAO.getAuthByToken(userGameCommand.getAuthToken()) == null) {
+            ErrorMessage error = new ErrorMessage("Unauthorized");
+            ctx.send(gson.toJson(error));
+            return;
+        }
+
+        if (gameData.getGame().getGameOver()) {
+            ErrorMessage error = new ErrorMessage("Game is over");
+            ctx.send(gson.toJson(error));
+            return;
+        }
+
+        boolean isWhite = userGameCommand.getUsername().equals(gameData.getWhiteUsername());
+        boolean isBlack = userGameCommand.getUsername().equals(gameData.getBlackUsername());
+
+        if (!isWhite && !isBlack) {
+            ErrorMessage error = new ErrorMessage("Observers cannot make moves");
+            ctx.send(gson.toJson(error));
+            return;
+        }
+
+        boolean whiteTurn = gameData.getGame().getTeamTurn() == ChessGame.TeamColor.WHITE;
+        if ((isWhite && !whiteTurn) || (isBlack && whiteTurn)) {
+            ErrorMessage error = new ErrorMessage("Not your turn");
+            ctx.send(gson.toJson(error));
+            return;
+        }
+
+        try {
+            gameData.getGame().makeMove(makeMoveCommand.getMove());
+        } catch (InvalidMoveException e) {
+            ErrorMessage error = new ErrorMessage("Invalid move");
+            ctx.send(gson.toJson(error));
+            return;
+        }
+
+        gameDAO.updateGame(gameData);
         LoadGameMessage loadGameMessage = new LoadGameMessage(gameData.getGame());
-        connections.broadcast(userGameCommand.getGameID(), gson.toJson(loadGameMessage));
+        connections.broadcast(gameData.getGameID(), gson.toJson(loadGameMessage));
 
         String notificationText = userGameCommand.getUsername() + " moved " + makeMoveCommand.getMove();
         NotificationMessage notificationMessage = new NotificationMessage(notificationText);
-        connections.broadcastExcept(userGameCommand.getGameID(), gson.toJson(notificationMessage), ctx);
+        connections.broadcastExcept(gameData.getGameID(), gson.toJson(notificationMessage), ctx);
     }
 
     private void error(UserGameCommand userGameCommand, String errorMessage, WsContext ctx) throws IOException {

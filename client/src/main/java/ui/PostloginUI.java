@@ -170,8 +170,13 @@ public class PostloginUI {
             return;
         }
 
+        if (game.getGame().getGameOver()) {
+            System.out.println("Game is over");
+            return;
+        }
+
         try {
-            server.joinGame(new JoinGameRequest(username, playerColor, game.getGameID()), authToken);
+            server.joinGame(new JoinGameRequest(playerColor, game.getGameID()), authToken);
 
             server.connectWebsocket();
             server.connect(authToken, game.getGameID());
@@ -202,6 +207,10 @@ public class PostloginUI {
 
             if (game == null) {
                 System.out.println(GAME_NUMBER_ERROR);
+                return;
+            }
+            if (game.getGame().getGameOver()) {
+                System.out.println("Game is over");
                 return;
             }
 

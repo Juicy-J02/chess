@@ -57,13 +57,7 @@ public class WebsocketCommunicator extends Endpoint {
             System.out.print("\r\033[2K");
             NotificationMessage notificationMessage = new Gson().fromJson(message, NotificationMessage.class);
             System.out.println(notificationMessage.getNotification());
-            if (!notificationMessage.getNotification().contains("joined")) {
-                if (!notificationMessage.getNotification().contains("left")) {
-                    System.out.print("\n" + "[GAMEPLAY] >>> ");
-                } else {
-                    System.out.print("\n" + "[LOGGED IN] >>> ");
-                }
-            }
+            System.out.print("\n" + "[GAMEPLAY] >>> ");
         }
     }
 

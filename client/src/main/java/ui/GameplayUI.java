@@ -24,23 +24,9 @@ public class GameplayUI {
                     String username, String authToken, String playerType) throws Exception {
 
         GameDAO gameDAO = new GameDataAccessSQL();
-
-        switch (playerColor) {
-
-            case "White":
-                printBoard.printBoard(gameDAO.getGame(game.getGameID()).getGame(), false);
-                break;
-
-            case "Black":
-                printBoard.printBoard(gameDAO.getGame(game.getGameID()).getGame(), true);
-                break;
-        }
-
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
-
-            System.out.print("\n" + "[GAMEPLAY]" + " >>> ");
 
             String line = scanner.nextLine();
 
@@ -72,11 +58,13 @@ public class GameplayUI {
 
                     switch(playerType) {
                         case "Player":
-                            server.joinGame(new JoinGameRequest(null, playerColor.toUpperCase(), game.getGameID()), authToken);
+                            server.joinGame(new JoinGameRequest(playerColor.toUpperCase(), game.getGameID()), "LEAVE");
                             server.leave(authToken, game.getGameID());
+                            break;
 
                         case "Observer":
                             server.leave(authToken, game.getGameID());
+                            break;
                     }
                     return;
 
@@ -121,6 +109,7 @@ public class GameplayUI {
                     System.out.println("Unknown command: " + line);
                     System.out.println("See help for list of commands");
             }
+            System.out.print("\n" + "[GAMEPLAY]" + " >>> ");
         }
     }
 }
