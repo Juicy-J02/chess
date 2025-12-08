@@ -3,7 +3,6 @@ package server;
 import dataaccess.*;
 import io.javalin.Javalin;
 import io.javalin.json.JavalinGson;
-import io.javalin.websocket.WsConnectContext;
 import service.ClearService;
 import service.GameService;
 import service.UserService;

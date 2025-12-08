@@ -87,7 +87,6 @@ public class GameDataAccessSQL extends SQLDataAccessBase implements GameDAO {
     @Override
     public void joinGame(int gameId, String userName, String playerColor) throws DataAccessException {
         GameData game = getGame(gameId);
-        takenSideError(playerColor, game);
         GameData newGame;
 
         if (playerColor.equals("WHITE")) {
@@ -143,14 +142,5 @@ public class GameDataAccessSQL extends SQLDataAccessBase implements GameDAO {
         ChessGame chessGame = new Gson().fromJson(chessGameJson, ChessGame.class);
 
         return new GameData(gameId, whiteUsername, blackUsername, gameName, chessGame);
-    }
-
-    public void takenSideError(String playerColor, GameData game) throws DataAccessException {
-        if (playerColor.equals("WHITE") && game.getWhiteUsername() != null) {
-            throw new DataAccessException("White side already taken");
-        }
-        if (playerColor.equals("BLACK") && game.getBlackUsername() != null) {
-            throw new DataAccessException("Black side already taken");
-        }
     }
 }

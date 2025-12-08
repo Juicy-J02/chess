@@ -171,8 +171,7 @@ public class PostloginUI {
         }
 
         try {
-            server.joinGame(new JoinGameRequest(playerColor, game.getGameID()), authToken);
-            System.out.println("Joined Game " + gameNumber + " as " + playerColor);
+            server.joinGame(new JoinGameRequest(username, playerColor, game.getGameID()), authToken);
 
             server.connectWebsocket();
             server.connect(authToken, game.getGameID());

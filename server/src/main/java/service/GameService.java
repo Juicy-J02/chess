@@ -67,6 +67,12 @@ public class GameService {
         if (game == null) {
             throw new DataAccessException("Error: Game not found");
         }
+
+        if (joinGameRequest.username() == null) {
+            gameDAO.joinGame(joinGameRequest.gameID(), null, joinGameRequest.playerColor());
+            return;
+        }
+
         if (joinGameRequest.playerColor().equals("WHITE") && game.getWhiteUsername() != null) {
             throw new DataAccessException("Error: White is already taken");
         }
