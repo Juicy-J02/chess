@@ -1,11 +1,8 @@
 package server;
 
-import chess.ChessGame;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
-import dataaccess.DataAccessException;
-import dataaccess.GameDAO;
-import dataaccess.GameDataAccessSQL;
+import dataaccess.*;
 import io.javalin.websocket.*;
 import model.GameData;
 import websocket.commands.MakeMoveCommand;
@@ -19,6 +16,7 @@ import java.io.IOException;
 public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
     private final ConnectionManager connections;
+    private final Gson gson = new Gson();
 
     public WebsocketHandler(ConnectionManager connections) {
         this.connections = connections;
@@ -35,37 +33,55 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     @Override
     public void handleMessage(WsMessageContext ctx) throws IOException {
-        UserGameCommand userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
-        MakeMoveCommand makeMoveCommand = new Gson().fromJson(ctx.message(), MakeMoveCommand.class);
+        UserGameCommand userGameCommand = gson.fromJson(ctx.message(), UserGameCommand.class);
+
         try {
             switch (userGameCommand.getCommandType()) {
                 case CONNECT -> connect(userGameCommand, ctx);
                 case LEAVE -> leave(userGameCommand, ctx);
                 case RESIGN -> resign(userGameCommand);
-                case MAKE_MOVE -> makeMove(userGameCommand, makeMoveCommand);
+                case MAKE_MOVE -> {
+                    MakeMoveCommand makeMoveCommand = gson.fromJson(ctx.message(), MakeMoveCommand.class);
+                    makeMove(userGameCommand, makeMoveCommand, ctx);
+                }
             }
         } catch (Exception e) {
-            error(userGameCommand, e.getMessage());
+            error(userGameCommand, e.getMessage(), ctx);
         }
     }
 
     private void connect(UserGameCommand userGameCommand, WsContext ctx) throws DataAccessException, IOException {
         connections.add(userGameCommand.getGameID(), ctx);
 
+        GameDAO gameDAO = new GameDataAccessSQL();
+        AuthDAO authDAO = new AuthDataAccessSQL();
+        GameData gameData = gameDAO.getGame(userGameCommand.getGameID());
+
+        if (gameData == null) {
+            ErrorMessage error = new ErrorMessage("Invalid game ID");
+            ctx.send(gson.toJson(error));
+            return;
+        }
+
+        if (authDAO.getAuthByToken(userGameCommand.getAuthToken()) == null) {
+            ErrorMessage error = new ErrorMessage("Unauthorized");
+            ctx.send(gson.toJson(error));
+            return;
+        }
+
+        LoadGameMessage loadMessage = new LoadGameMessage(gameData.getGame());
+        ctx.send(gson.toJson(loadMessage));
+
         String message = userGameCommand.getUsername() + " has joined the game";
         NotificationMessage notificationMessage = new NotificationMessage(message);
-
-        String json = new Gson().toJson(notificationMessage);
-        connections.broadcast(userGameCommand.getGameID(), json);
+        connections.broadcastExcept(userGameCommand.getGameID(), gson.toJson(notificationMessage), ctx);
     }
 
     private void leave(UserGameCommand userGameCommand, WsContext ctx) throws DataAccessException, IOException {
         String message = userGameCommand.getUsername() + " has left the game";
         NotificationMessage notificationMessage = new NotificationMessage(message);
 
-        String json = new Gson().toJson(notificationMessage);
-        connections.broadcast(userGameCommand.getGameID(), json);
-
+        connections.broadcast(userGameCommand.getGameID(), gson.toJson(notificationMessage));
         connections.remove(userGameCommand.getGameID(), ctx);
     }
 
@@ -73,33 +89,26 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         String message = userGameCommand.getUsername() + " has resigned";
         NotificationMessage notificationMessage = new NotificationMessage(message);
 
-        String json = new Gson().toJson(notificationMessage);
-        connections.broadcast(userGameCommand.getGameID(), json);
+        connections.broadcast(userGameCommand.getGameID(), gson.toJson(notificationMessage));
     }
 
-    private void makeMove(UserGameCommand userGameCommand, MakeMoveCommand makeMoveCommand) throws DataAccessException, IOException {
-        GameDAO gameDataAccess = new GameDataAccessSQL();
+    private void makeMove(UserGameCommand userGameCommand, MakeMoveCommand makeMoveCommand, WsContext ctx) throws DataAccessException, IOException, InvalidMoveException {
+        GameDAO gameDAO = new GameDataAccessSQL();
+        GameData gameData = gameDAO.getGame(makeMoveCommand.getGameID());
 
-        GameData gameData = gameDataAccess.getGame(makeMoveCommand.getGameID());
+        gameData.getGame().makeMove(makeMoveCommand.getMove());
+        gameDAO.updateGame(gameData);
 
-        try {
-            gameData.getGame().makeMove(makeMoveCommand.getMove());
+        LoadGameMessage loadGameMessage = new LoadGameMessage(gameData.getGame());
+        connections.broadcast(userGameCommand.getGameID(), gson.toJson(loadGameMessage));
 
-            gameDataAccess.updateGame(gameData);
-
-            LoadGameMessage loadGameMessage = new LoadGameMessage(gameData.getGame());
-            String json = new Gson().toJson(loadGameMessage);
-            connections.broadcast(userGameCommand.getGameID(), json);
-
-        } catch (InvalidMoveException e) {
-            error(makeMoveCommand, "Invalid move: " + e.getMessage());
-        }
+        String notificationText = userGameCommand.getUsername() + " moved " + makeMoveCommand.getMove();
+        NotificationMessage notificationMessage = new NotificationMessage(notificationText);
+        connections.broadcastExcept(userGameCommand.getGameID(), gson.toJson(notificationMessage), ctx);
     }
 
-    private void error(UserGameCommand userGameCommand, String errorMessage) throws IOException {
+    private void error(UserGameCommand userGameCommand, String errorMessage, WsContext ctx) throws IOException {
         ErrorMessage error = new ErrorMessage(errorMessage);
-        String json = new Gson().toJson(error);
-        connections.broadcast(userGameCommand.getGameID(), json);
+        connections.broadcastExcept(userGameCommand.getGameID(), gson.toJson(error), ctx);
     }
-
 }

@@ -3,6 +3,7 @@ package server;
 import io.javalin.websocket.WsContext;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,6 +30,17 @@ public class ConnectionManager {
         if (gameClients != null) {
             for (WsContext ctx : gameClients) {
                 if (ctx.session.isOpen()) {
+                    ctx.session.getRemote().sendString(message);
+                }
+            }
+        }
+    }
+
+    public void broadcastExcept(int gameID, String message, WsContext exclude) throws IOException {
+        Set<WsContext> gameClients = connections.get(gameID);
+        if (gameClients != null) {
+            for (WsContext ctx : gameClients) {
+                if (!ctx.equals(exclude) && ctx.session.isOpen()) {
                     ctx.session.getRemote().sendString(message);
                 }
             }

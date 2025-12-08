@@ -1,11 +1,12 @@
 package ui;
 
 import chess.*;
+import dataaccess.GameDAO;
+import dataaccess.GameDataAccessSQL;
 import model.GameData;
 import model.JoinGameRequest;
 
 import server.ServerFacade;
-import websocket.commands.MakeMoveCommand;
 
 import java.util.Scanner;
 
@@ -22,14 +23,16 @@ public class GameplayUI {
     public void run(GameData game, String playerColor, Integer gameNumber,
                     String username, String authToken, String playerType) throws Exception {
 
+        GameDAO gameDAO = new GameDataAccessSQL();
+
         switch (playerColor) {
 
             case "White":
-                printBoard.printBoard(game.getGame(), false);
+                printBoard.printBoard(gameDAO.getGame(game.getGameID()).getGame(), false);
                 break;
 
             case "Black":
-                printBoard.printBoard(game.getGame(), true);
+                printBoard.printBoard(gameDAO.getGame(game.getGameID()).getGame(), true);
                 break;
         }
 
