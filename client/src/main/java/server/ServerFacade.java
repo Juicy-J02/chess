@@ -45,8 +45,8 @@ public class ServerFacade {
         httpCommunicator.clear();
     }
 
-    public void connectWebsocket() {
-        websocketCommunicator =  new WebsocketCommunicator(url);
+    public void connectWebsocket(String playerColor) {
+        websocketCommunicator =  new WebsocketCommunicator(url, playerColor);
     }
 
     public void sendMessage(UserGameCommand userGameCommand) {

@@ -57,22 +57,20 @@ public class GameService {
     }
 
     public void joinGame(JoinGameRequest joinGameRequest, String authToken) throws DataAccessException {
-        AuthData authData = authDAO.getAuthByToken(authToken);
-        if (authData == null) {
-            throw new DataAccessException("Error: No Auth data");
-        }
-
         GameData game = gameDAO.getGame(joinGameRequest.gameID());
 
         if (game == null) {
             throw new DataAccessException("Error: Game not found");
         }
 
-        if (authData.getUsername().equals(game.getWhiteUsername())) {
-            gameDAO.joinGame(joinGameRequest.gameID(), null, "WHITE");
+        if (authToken.equals("LEAVE")) {
+            gameDAO.joinGame(joinGameRequest.gameID(), null, joinGameRequest.playerColor());
+            return;
         }
-        if (authData.getUsername().equals(game.getBlackUsername())) {
-            gameDAO.joinGame(joinGameRequest.gameID(), null, "BLACK");
+
+        AuthData authData = authDAO.getAuthByToken(authToken);
+        if (authData == null) {
+            throw new DataAccessException("Error: No Auth data");
         }
 
         if (joinGameRequest.playerColor().equals("WHITE") && game.getWhiteUsername() != null) {

@@ -6,7 +6,10 @@ import chess.ChessPosition;
 
 public class PrintBoard {
 
-    public void printBoard(ChessGame game, boolean flip) {
+    public void printBoard(ChessGame game, String playerColor) {
+
+        boolean flip = "BLACK".equals(playerColor);
+
         columnHeader(flip);
 
         for (int i = 8; i >= 1; i--) {

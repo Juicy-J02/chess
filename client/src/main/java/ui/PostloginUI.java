@@ -21,7 +21,7 @@ public class PostloginUI {
         this.server = server;
     }
 
-    public void run(String username, String authToken) throws Exception {
+    public void run(String authToken) throws Exception {
         Scanner scanner = new Scanner(System.in);
 
         while(true) {
@@ -68,11 +68,11 @@ public class PostloginUI {
                     break;
 
                 case "join":
-                    join(params, authToken, username);
+                    join(params, authToken);
                     break;
 
                 case "observe":
-                    observe(params, username, authToken);
+                    observe(params, authToken);
                     break;
 
                 default:
@@ -138,7 +138,7 @@ public class PostloginUI {
         }
     }
 
-    private void join(String[] params, String authToken, String username) {
+    private void join(String[] params, String authToken) {
         if (params.length < 2) {
             System.out.println(NOT_ENOUGH_ERROR);
             return;
@@ -178,17 +178,16 @@ public class PostloginUI {
         try {
             server.joinGame(new JoinGameRequest(playerColor, game.getGameID()), authToken);
 
-            server.connectWebsocket();
+            server.connectWebsocket(playerColor);
             server.connect(authToken, game.getGameID());
 
-            new GameplayUI(this.server).run(game, playerColor.equals("WHITE") ? "White" : "Black", gameNumber,
-                    username, authToken, "Player");
+            new GameplayUI(this.server).run(game, playerColor.equals("WHITE") ? "White" : "Black", authToken, "Player");
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
     }
 
-    private void observe(String[] params, String username, String authToken) {
+    private void observe(String[] params, String authToken) {
         if (params.length < 1) {
             System.out.println(NOT_ENOUGH_ERROR);
             return;
@@ -214,11 +213,10 @@ public class PostloginUI {
                 return;
             }
 
-            server.connectWebsocket();
+            server.connectWebsocket("OBSERVER");
             server.connect(authToken, game.getGameID());
 
-            new GameplayUI(this.server).run(game, "White", gameNumber,
-                    username, authToken, "Observer");
+            new GameplayUI(this.server).run(game, "White", authToken, "Observer");
         } catch (Exception ex) {
             System.out.println("Observe a game with <ID>");
         }

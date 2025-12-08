@@ -15,8 +15,11 @@ import websocket.messages.ServerMessage;
 public class WebsocketCommunicator extends Endpoint {
 
     Session session;
+    String playerColor;
 
-    public WebsocketCommunicator(String url) {
+    public WebsocketCommunicator(String url, String playerColor) {
+        this.playerColor = playerColor;
+
         try {
             url = url.replace("http", "ws");
             URI uri = new URI(url + "/ws");
@@ -44,7 +47,7 @@ public class WebsocketCommunicator extends Endpoint {
         if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
             System.out.print("\r\033[2K");
             LoadGameMessage loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
-            new PrintBoard().printBoard(loadGameMessage.getGame(), true);
+            new PrintBoard().printBoard(loadGameMessage.getGame(), playerColor);
             System.out.print("\n" + "[GAMEPLAY] >>> ");
         }
         else if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.ERROR) {

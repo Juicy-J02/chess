@@ -1,8 +1,6 @@
 package ui;
 
 import chess.*;
-import dataaccess.GameDAO;
-import dataaccess.GameDataAccessSQL;
 import model.GameData;
 import model.JoinGameRequest;
 
@@ -20,10 +18,8 @@ public class GameplayUI {
         this.printBoard = new PrintBoard();
     }
 
-    public void run(GameData game, String playerColor, Integer gameNumber,
-                    String username, String authToken, String playerType) throws Exception {
+    public void run(GameData game, String playerColor, String authToken, String playerType) throws Exception {
 
-        GameDAO gameDAO = new GameDataAccessSQL();
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
@@ -42,16 +38,7 @@ public class GameplayUI {
                     break;
 
                 case "redraw":
-                    switch (playerColor) {
-
-                        case "White":
-                            printBoard.printBoard(game.getGame(), false);
-                            break;
-
-                        case "Black":
-                            printBoard.printBoard(game.getGame(), true);
-                            break;
-                    }
+                    printBoard.printBoard(game.getGame(), playerColor);
                     break;
 
                 case "leave":
