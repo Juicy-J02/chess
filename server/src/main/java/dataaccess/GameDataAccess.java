@@ -55,6 +55,11 @@ public class GameDataAccess implements GameDAO {
     }
 
     @Override
+    public void updateGame(GameData gameData) throws DataAccessException {
+
+    }
+
+    @Override
     public void clearGames() {
         games.clear();
         gameID = 1;

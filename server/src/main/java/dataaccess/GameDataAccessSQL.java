@@ -122,6 +122,23 @@ public class GameDataAccessSQL extends SQLDataAccessBase implements GameDAO {
     }
 
     @Override
+    public void updateGame(GameData gameData) throws DataAccessException {
+        String gameJson = new Gson().toJson(gameData.getGame());
+        try {
+            Connection connection = DatabaseManager.getConnection();
+            var preparedStatement = connection.prepareStatement(
+                    "UPDATE games SET chessGame=? WHERE gameId=?"
+            );
+            preparedStatement.setString(1, gameJson);
+            preparedStatement.setInt(2, gameData.getGameID());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException("Data Access Error: " + e.getMessage());
+        }
+    }
+
+
+    @Override
     public void clearGames() throws DataAccessException {
         try {
             Connection connection = DatabaseManager.getConnection();

@@ -34,6 +34,14 @@ public class ChessPosition {
         return col;
     }
 
+    public static ChessPosition fromAlgebraic(String pos) {
+        pos = pos.toLowerCase().trim();
+        int col = pos.charAt(0) - 'a' + 1;
+        int row = Integer.parseInt(pos.substring(1));
+        return new ChessPosition(row, col);
+    }
+
+
     @Override
     public String toString() {
         return String.format("[%d,%d]", row, col);

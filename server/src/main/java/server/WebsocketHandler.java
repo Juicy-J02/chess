@@ -1,10 +1,17 @@
 package server;
 
+import chess.ChessGame;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
+import dataaccess.GameDAO;
+import dataaccess.GameDataAccessSQL;
 import io.javalin.websocket.*;
+import model.GameData;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 
 import java.io.IOException;
@@ -29,12 +36,13 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     @Override
     public void handleMessage(WsMessageContext ctx) throws IOException {
         UserGameCommand userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+        MakeMoveCommand makeMoveCommand = new Gson().fromJson(ctx.message(), MakeMoveCommand.class);
         try {
             switch (userGameCommand.getCommandType()) {
                 case CONNECT -> connect(userGameCommand, ctx);
                 case LEAVE -> leave(userGameCommand, ctx);
                 case RESIGN -> resign(userGameCommand);
-                case MAKE_MOVE -> makeMove(userGameCommand);
+                case MAKE_MOVE -> makeMove(userGameCommand, makeMoveCommand);
             }
         } catch (Exception e) {
             error(userGameCommand, e.getMessage());
@@ -69,12 +77,23 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.broadcast(userGameCommand.getGameID(), json);
     }
 
-    private void makeMove(UserGameCommand userGameCommand) throws DataAccessException, IOException {
-        String message = userGameCommand.getUsername() + " made move";
-        NotificationMessage notificationMessage = new NotificationMessage(message);
+    private void makeMove(UserGameCommand userGameCommand, MakeMoveCommand makeMoveCommand) throws DataAccessException, IOException {
+        GameDAO gameDataAccess = new GameDataAccessSQL();
 
-        String json = new Gson().toJson(notificationMessage);
-        connections.broadcast(userGameCommand.getGameID(), json);
+        GameData gameData = gameDataAccess.getGame(makeMoveCommand.getGameID());
+
+        try {
+            gameData.getGame().makeMove(makeMoveCommand.getMove());
+
+            gameDataAccess.updateGame(gameData);
+
+            LoadGameMessage loadGameMessage = new LoadGameMessage(gameData.getGame());
+            String json = new Gson().toJson(loadGameMessage);
+            connections.broadcast(userGameCommand.getGameID(), json);
+
+        } catch (InvalidMoveException e) {
+            error(makeMoveCommand, "Invalid move: " + e.getMessage());
+        }
     }
 
     private void error(UserGameCommand userGameCommand, String errorMessage) throws IOException {

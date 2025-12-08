@@ -1,7 +1,9 @@
 package server;
 
+import chess.ChessMove;
 import com.google.gson.Gson;
 import model.*;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 
 public class ServerFacade {
@@ -56,8 +58,8 @@ public class ServerFacade {
         sendMessage(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID));
     }
 
-    public void makeMove(String authToken, Integer gameID) {
-        sendMessage(new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID));
+    public void makeMove(String authToken, Integer gameID, ChessMove move) {
+        sendMessage(new MakeMoveCommand(authToken, gameID, move));
     }
 
     public void leave(String authToken, Integer gameID) {

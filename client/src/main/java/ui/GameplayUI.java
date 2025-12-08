@@ -5,6 +5,8 @@ import model.GameData;
 import model.JoinGameRequest;
 
 import server.ServerFacade;
+import websocket.commands.MakeMoveCommand;
+
 import java.util.Scanner;
 
 public class GameplayUI {
@@ -76,7 +78,32 @@ public class GameplayUI {
                     return;
 
                 case "move":
-                    server.makeMove(authToken, game.getGameID());
+                    System.out.print("Enter move: ");
+                    String moveInput = scanner.nextLine();
+                    String[] parts = moveInput.split(" ");
+
+
+                    if (parts.length < 2) {
+                        System.out.println("Invalid move format. Use: startPosition endPosition");
+                        break;
+                    }
+
+                    try {
+                        ChessPosition start = ChessPosition.fromAlgebraic(parts[0]);
+                        ChessPosition end = ChessPosition.fromAlgebraic(parts[1]);
+                        ChessPiece.PieceType promotion = null;
+
+                        if (parts.length == 3) {
+                            promotion = ChessPiece.PieceType.valueOf(parts[2].toUpperCase());
+                        }
+
+                        ChessMove move = new ChessMove(start, end, promotion);
+                        server.makeMove(authToken, game.getGameID(), move);
+
+                    } catch (Exception e) {
+                        System.out.println("Error: " + e.getMessage());
+                    }
+
                     break;
 
                 case "resign":
