@@ -8,20 +8,29 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
 
-    private final ConcurrentHashMap<WsContext, WsContext> connections = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, Set<WsContext>> connections = new ConcurrentHashMap<>();
 
-    public void add(WsContext ctx) {
-        connections.put(ctx, ctx);
+    public void add(Integer gameID, WsContext ctx) {
+        connections.computeIfAbsent(gameID, k -> ConcurrentHashMap.newKeySet()).add(ctx);
     }
 
-    public void remove(WsContext ctx) {
-        connections.remove(ctx);
+    public void remove(Integer gameID, WsContext ctx) {
+        Set<WsContext> gameClients = connections.get(gameID);
+        if (gameClients != null) {
+            gameClients.remove(ctx);
+            if (gameClients.isEmpty()) {
+                connections.remove(gameID);
+            }
+        }
     }
 
-    public void broadcast(String message) throws IOException {
-        for (WsContext ctx : connections.values()) {
-            if (ctx.session.isOpen()) {
-                ctx.session.getRemote().sendString(message);
+    public void broadcast(Integer gameID, String message) throws IOException {
+        Set<WsContext> gameClients = connections.get(gameID);
+        if (gameClients != null) {
+            for (WsContext ctx : gameClients) {
+                if (ctx.session.isOpen()) {
+                    ctx.session.getRemote().sendString(message);
+                }
             }
         }
     }

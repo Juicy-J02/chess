@@ -37,18 +37,18 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 case MAKE_MOVE -> makeMove(userGameCommand);
             }
         } catch (Exception e) {
-            error(e.getMessage());
+            error(userGameCommand, e.getMessage());
         }
     }
 
     private void connect(UserGameCommand userGameCommand, WsContext ctx) throws DataAccessException, IOException {
-        connections.add(ctx);
+        connections.add(userGameCommand.getGameID(), ctx);
 
         String message = userGameCommand.getUsername() + " has joined the game";
         NotificationMessage notificationMessage = new NotificationMessage(message);
 
         String json = new Gson().toJson(notificationMessage);
-        connections.broadcast(json);
+        connections.broadcast(userGameCommand.getGameID(), json);
     }
 
     private void leave(UserGameCommand userGameCommand, WsContext ctx) throws DataAccessException, IOException {
@@ -56,9 +56,9 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         NotificationMessage notificationMessage = new NotificationMessage(message);
 
         String json = new Gson().toJson(notificationMessage);
-        connections.broadcast(json);
+        connections.broadcast(userGameCommand.getGameID(), json);
 
-        connections.remove(ctx);
+        connections.remove(userGameCommand.getGameID(), ctx);
     }
 
     private void resign(UserGameCommand userGameCommand) throws DataAccessException, IOException {
@@ -66,7 +66,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         NotificationMessage notificationMessage = new NotificationMessage(message);
 
         String json = new Gson().toJson(notificationMessage);
-        connections.broadcast(json);
+        connections.broadcast(userGameCommand.getGameID(), json);
     }
 
     private void makeMove(UserGameCommand userGameCommand) throws DataAccessException, IOException {
@@ -74,13 +74,13 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         NotificationMessage notificationMessage = new NotificationMessage(message);
 
         String json = new Gson().toJson(notificationMessage);
-        connections.broadcast(json);
+        connections.broadcast(userGameCommand.getGameID(), json);
     }
 
-    private void error(String errorMessage) throws IOException {
+    private void error(UserGameCommand userGameCommand, String errorMessage) throws IOException {
         ErrorMessage error = new ErrorMessage(errorMessage);
         String json = new Gson().toJson(error);
-        connections.broadcast(json);
+        connections.broadcast(userGameCommand.getGameID(), json);
     }
 
 }
