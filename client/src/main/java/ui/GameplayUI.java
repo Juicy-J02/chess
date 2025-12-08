@@ -3,6 +3,7 @@ package ui;
 import chess.*;
 import model.GameData;
 import model.JoinGameRequest;
+
 import server.ServerFacade;
 import java.util.Scanner;
 
@@ -16,7 +17,8 @@ public class GameplayUI {
         this.printBoard = new PrintBoard();
     }
 
-    public void run(GameData game, String playerColor, Integer gameNumber, String username, String authToken) throws Exception {
+    public void run(GameData game, String playerColor, Integer gameNumber,
+                    String username, String authToken, String playerType) throws Exception {
 
         switch (playerColor) {
 
@@ -62,8 +64,15 @@ public class GameplayUI {
                     break;
 
                 case "leave":
-                    server.joinGame(new JoinGameRequest(null, playerColor.toUpperCase(), game.getGameID()), authToken);
-                    server.leave(authToken, game.getGameID());
+
+                    switch(playerType) {
+                        case "Player":
+                            server.joinGame(new JoinGameRequest(null, playerColor.toUpperCase(), game.getGameID()), authToken);
+                            server.leave(authToken, game.getGameID());
+
+                        case "Observer":
+                            server.leave(authToken, game.getGameID());
+                    }
                     return;
 
                 case "move":

@@ -177,7 +177,7 @@ public class PostloginUI {
             server.connect(authToken, game.getGameID());
 
             new GameplayUI(this.server).run(game, playerColor.equals("WHITE") ? "White" : "Black", gameNumber,
-                    username, authToken);
+                    username, authToken, "Player");
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
@@ -208,7 +208,8 @@ public class PostloginUI {
             server.connectWebsocket();
             server.connect(authToken, game.getGameID());
 
-            new GameplayUI(this.server).run(game, "White", gameNumber, username, authToken);
+            new GameplayUI(this.server).run(game, "White", gameNumber,
+                    username, authToken, "Observer");
         } catch (Exception ex) {
             System.out.println("Observe a game with <ID>");
         }
