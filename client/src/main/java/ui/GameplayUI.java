@@ -6,6 +6,8 @@ import model.JoinGameRequest;
 
 import server.ServerFacade;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Scanner;
 
 public class GameplayUI {
@@ -60,7 +62,6 @@ public class GameplayUI {
                     String moveInput = scanner.nextLine();
                     String[] parts = moveInput.split(" ");
 
-
                     if (parts.length < 2) {
                         System.out.println("Invalid move format. Use: startPosition endPosition");
                         break;
@@ -89,7 +90,37 @@ public class GameplayUI {
                     break;
 
                 case "highlight":
-                    System.out.println("WIP");
+                    System.out.print("Enter piece: ");
+                    String inputPos = scanner.nextLine();
+
+                    try {
+                        ChessPosition pos = ChessPosition.fromAlgebraic(inputPos);
+                        ChessPiece piece = game.getGame().getBoard().getPiece(pos);
+
+                        if (piece == null) {
+                            System.out.println("No piece at that position.");
+                            break;
+                        }
+
+                        if (!piece.getTeamColor().toString().equalsIgnoreCase(playerColor)) {
+                            System.out.println("You can only highlight your own pieces.");
+                            break;
+                        }
+
+                        Collection<ChessMove> legalMoves = game.getGame().validMoves(pos);
+
+                        if (legalMoves == null || legalMoves.isEmpty()) {
+                            System.out.println("No legal moves for this piece.");
+                        } else {
+                            List<ChessPosition> highlightMoves = new java.util.ArrayList<>(legalMoves.stream()
+                                    .map(ChessMove::getEndPosition)
+                                    .toList());
+                            highlightMoves.add(pos);
+                            printBoard.printBoard(game.getGame(), playerColor, highlightMoves);
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error: " + e.getMessage());
+                    }
                     break;
 
                 default:

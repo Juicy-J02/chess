@@ -4,9 +4,15 @@ import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
+import java.util.Collection;
+
 public class PrintBoard {
 
     public void printBoard(ChessGame game, String playerColor) {
+        printBoard(game, playerColor, null);
+    }
+
+    public void printBoard(ChessGame game, String playerColor, Collection<ChessPosition> highlightPositions) {
 
         boolean flip = "BLACK".equals(playerColor);
 
@@ -23,8 +29,13 @@ public class PrintBoard {
 
                 boolean isLight = (row + col) % 2 == 0;
                 String bg = isLight ? EscapeSequences.SET_BG_COLOR_DARK_GREY : EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
-                String symbol = piece != null ? getPieceSymbol(piece) : EscapeSequences.EMPTY;
 
+                if (highlightPositions != null && highlightPositions.contains(pos)) {
+                    boolean capture = piece != null;
+                    bg = capture ? EscapeSequences.SET_BG_COLOR_RED : EscapeSequences.SET_BG_COLOR_YELLOW;
+                }
+
+                String symbol = piece != null ? getPieceSymbol(piece) : EscapeSequences.EMPTY;
                 System.out.print(bg + symbol + EscapeSequences.RESET_BG_COLOR);
             }
             System.out.println(" " + row);
@@ -33,9 +44,9 @@ public class PrintBoard {
         columnHeader(flip);
     }
 
+
     private void columnHeader(boolean flip) {
         System.out.print("   ");
-
         for (int j = 1; j <= 8; j++) {
             int col = flip ? 9 - j : j;
             System.out.print((char)('a' + col - 1) + "   ");
@@ -53,5 +64,4 @@ public class PrintBoard {
             case PAWN -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.BLACK_PAWN : EscapeSequences.WHITE_PAWN;
         };
     }
-
 }
