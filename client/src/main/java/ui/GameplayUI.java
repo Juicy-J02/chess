@@ -59,32 +59,7 @@ public class GameplayUI {
                     return;
 
                 case "move":
-                    System.out.println("Give a start position and end position");
-                    System.out.print("Enter move: ");
-                    String moveInput = scanner.nextLine();
-                    String[] parts = moveInput.split(" ");
-
-                    if (parts.length < 2) {
-                        System.out.println("Give a start position and end position");
-                        break;
-                    }
-
-                    try {
-                        ChessPosition start = ChessPosition.fromAlgebraic(parts[0]);
-                        ChessPosition end = ChessPosition.fromAlgebraic(parts[1]);
-                        ChessPiece.PieceType promotion = null;
-
-                        if (parts.length == 3) {
-                            promotion = ChessPiece.PieceType.valueOf(parts[2].toUpperCase());
-                        }
-
-                        ChessMove move = new ChessMove(start, end, promotion);
-                        server.makeMove(authToken, game.getGameID(), move);
-
-                    } catch (Exception e) {
-                        System.out.println("Error: " + e.getMessage());
-                    }
-
+                    move(game, authToken, scanner);
                     break;
 
                 case "resign":
@@ -92,38 +67,7 @@ public class GameplayUI {
                     break;
 
                 case "highlight":
-                    System.out.print("Enter piece: ");
-                    String inputPos = scanner.nextLine();
-
-                    try {
-                        ChessPosition pos = ChessPosition.fromAlgebraic(inputPos);
-                        ChessPiece piece = game.getGame().getBoard().getPiece(pos);
-
-                        if (piece == null) {
-                            System.out.println("No piece at that position.");
-                            break;
-                        }
-
-                        if (!piece.getTeamColor().toString().equalsIgnoreCase(playerColor)) {
-                            System.out.println("You can only highlight your own pieces.");
-                            break;
-                        }
-
-                        Collection<ChessMove> legalMoves = game.getGame().validMoves(pos);
-
-                        if (legalMoves == null || legalMoves.isEmpty()) {
-                            System.out.println("No legal moves for this piece.");
-                        } else {
-                            List<ChessPosition> highlightMoves =
-                                    new java.util.ArrayList<>(legalMoves.stream()
-                                    .map(ChessMove::getEndPosition)
-                                    .toList());
-                            highlightMoves.add(pos);
-                            printBoard.printBoard(game.getGame(), playerColor, highlightMoves);
-                        }
-                    } catch (Exception e) {
-                        System.out.println("Error: " + e.getMessage());
-                    }
+                    highlight(game, playerColor, scanner);
                     break;
 
                 default:
@@ -131,6 +75,69 @@ public class GameplayUI {
                     System.out.println("See help for list of commands");
             }
             System.out.print("\n" + "[GAMEPLAY]" + " >>> ");
+        }
+    }
+
+    private void move(GameData game, String authToken, Scanner scanner) {
+        System.out.println("Give a start position and end position");
+        System.out.print("Enter move: ");
+        String moveInput = scanner.nextLine();
+        String[] parts = moveInput.split(" ");
+
+        if (parts.length < 2) {
+            System.out.println("Give a start position and end position");
+            return;
+        }
+
+        try {
+            ChessPosition start = ChessPosition.fromAlgebraic(parts[0]);
+            ChessPosition end = ChessPosition.fromAlgebraic(parts[1]);
+            ChessPiece.PieceType promotion = null;
+
+            if (parts.length == 3) {
+                promotion = ChessPiece.PieceType.valueOf(parts[2].toUpperCase());
+            }
+
+            ChessMove move = new ChessMove(start, end, promotion);
+            server.makeMove(authToken, game.getGameID(), move);
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private void highlight(GameData game, String playerColor, Scanner scanner) {
+        System.out.print("Enter piece: ");
+        String inputPos = scanner.nextLine();
+
+        try {
+            ChessPosition pos = ChessPosition.fromAlgebraic(inputPos);
+            ChessPiece piece = game.getGame().getBoard().getPiece(pos);
+
+            if (piece == null) {
+                System.out.println("No piece at that position.");
+                return;
+            }
+
+            if (!piece.getTeamColor().toString().equalsIgnoreCase(playerColor)) {
+                System.out.println("You can only highlight your own pieces.");
+                return;
+            }
+
+            Collection<ChessMove> legalMoves = game.getGame().validMoves(pos);
+
+            if (legalMoves == null || legalMoves.isEmpty()) {
+                System.out.println("No legal moves for this piece.");
+            } else {
+                List<ChessPosition> highlightMoves =
+                        new java.util.ArrayList<>(legalMoves.stream()
+                                .map(ChessMove::getEndPosition)
+                                .toList());
+                highlightMoves.add(pos);
+                printBoard.printBoard(game.getGame(), playerColor, highlightMoves);
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 }
