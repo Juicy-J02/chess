@@ -5,6 +5,7 @@ import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.*;
 import io.javalin.websocket.*;
+import model.AuthData;
 import model.GameData;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
@@ -73,16 +74,24 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         LoadGameMessage loadMessage = new LoadGameMessage(gameData.getGame());
         ctx.send(gson.toJson(loadMessage));
 
-        String message = userGameCommand.getUsername() + " has joined the game";
+        String message = getUsername(userGameCommand.getAuthToken()) + " has joined the game";
         NotificationMessage notificationMessage = new NotificationMessage(message);
         connections.broadcastExcept(userGameCommand.getGameID(), gson.toJson(notificationMessage), ctx);
     }
 
     private void leave(UserGameCommand userGameCommand, WsContext ctx) throws DataAccessException, IOException {
         GameDAO gameDAO = new GameDataAccessSQL();
-        gameDAO.joinGame(userGameCommand.getGameID(), null, userGameCommand.getTeamColor());
+        GameDataAccessSQL gameDataAccessSQL = new GameDataAccessSQL();
+        GameData gameData = gameDataAccessSQL.getGame(userGameCommand.getGameID());
+        if (getUsername(userGameCommand.getAuthToken()).equals(gameData.getWhiteUsername())) {
+            gameDAO.joinGame(userGameCommand.getGameID(), null, "WHITE");
+        } else if (getUsername(userGameCommand.getAuthToken()).equals(gameData.getBlackUsername())){
+            gameDAO.joinGame(userGameCommand.getGameID(), null, "BLACK");
+        } else {
+            gameDAO.joinGame(userGameCommand.getGameID(), null, "OBSERVER");
+        }
 
-        String message = userGameCommand.getUsername() + " has left the game";
+        String message = getUsername(userGameCommand.getAuthToken()) + " has left the game";
         NotificationMessage notificationMessage = new NotificationMessage(message);
 
         connections.broadcastExcept(userGameCommand.getGameID(), gson.toJson(notificationMessage), ctx);
@@ -99,8 +108,8 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             return;
         }
 
-        boolean isWhite = userGameCommand.getUsername().equals(gameData.getWhiteUsername());
-        boolean isBlack = userGameCommand.getUsername().equals(gameData.getBlackUsername());
+        boolean isWhite = getUsername(userGameCommand.getAuthToken()).equals(gameData.getWhiteUsername());
+        boolean isBlack = getUsername(userGameCommand.getAuthToken()).equals(gameData.getBlackUsername());
 
         if (!isWhite && !isBlack) {
             ErrorMessage error = new ErrorMessage("Observers cannot resign");
@@ -112,7 +121,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         gameDAO.updateGame(gameData);
 
 
-        String message = userGameCommand.getUsername() + " has resigned";
+        String message = getUsername(userGameCommand.getAuthToken()) + " has resigned";
         NotificationMessage notificationMessage = new NotificationMessage(message);
         connections.broadcast(gameData.getGameID(), gson.toJson(notificationMessage));
     }
@@ -136,8 +145,8 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             return;
         }
 
-        boolean isWhite = userGameCommand.getUsername().equals(gameData.getWhiteUsername());
-        boolean isBlack = userGameCommand.getUsername().equals(gameData.getBlackUsername());
+        boolean isWhite = getUsername(makeMoveCommand.getAuthToken()).equals(gameData.getWhiteUsername());
+        boolean isBlack = getUsername(makeMoveCommand.getAuthToken()).equals(gameData.getBlackUsername());
 
         if (!isWhite && !isBlack) {
             ErrorMessage error = new ErrorMessage("Observers cannot make moves");
@@ -164,7 +173,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         LoadGameMessage loadGameMessage = new LoadGameMessage(gameData.getGame());
         connections.broadcast(gameData.getGameID(), gson.toJson(loadGameMessage));
 
-        String notificationText = userGameCommand.getUsername() + " moved " + makeMoveCommand.getMove();
+        String notificationText = getUsername(makeMoveCommand.getAuthToken()) + " moved " + makeMoveCommand.getMove();
         NotificationMessage notificationMessage = new NotificationMessage(notificationText);
         connections.broadcastExcept(gameData.getGameID(), gson.toJson(notificationMessage), ctx);
 
@@ -195,5 +204,11 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private void error(UserGameCommand userGameCommand, String errorMessage, WsContext ctx) throws IOException {
         ErrorMessage error = new ErrorMessage(errorMessage);
         connections.broadcastExcept(userGameCommand.getGameID(), gson.toJson(error), ctx);
+    }
+
+    private String getUsername(String authToken) throws DataAccessException {
+        AuthDataAccessSQL authDataAccessSQL = new AuthDataAccessSQL();
+        AuthData authData = authDataAccessSQL.getAuthByToken(authToken);
+        return authData.getUsername();
     }
 }

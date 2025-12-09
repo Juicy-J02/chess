@@ -1,11 +1,5 @@
 package websocket.commands;
 
-import dataaccess.AuthDataAccessSQL;
-import dataaccess.DataAccessException;
-import dataaccess.GameDataAccessSQL;
-import model.AuthData;
-import model.GameData;
-
 import java.util.Objects;
 
 /**
@@ -45,24 +39,6 @@ public class UserGameCommand {
 
     public Integer getGameID() {
         return gameID;
-    }
-
-    public String getUsername() throws DataAccessException {
-        AuthDataAccessSQL authDataAccessSQL = new AuthDataAccessSQL();
-        AuthData authData = authDataAccessSQL.getAuthByToken(authToken);
-        return authData.getUsername();
-    }
-
-    public String getTeamColor() throws DataAccessException {
-        GameDataAccessSQL gameDataAccessSQL = new GameDataAccessSQL();
-        GameData gameData = gameDataAccessSQL.getGame(gameID);
-        if (getUsername().equals(gameData.getWhiteUsername())) {
-            return "WHITE";
-        } else if (getUsername().equals(gameData.getBlackUsername())){
-            return "BLACK";
-        } else {
-            return "OBSERVER";
-        }
     }
 
     @Override
