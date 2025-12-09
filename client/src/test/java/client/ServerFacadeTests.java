@@ -14,7 +14,7 @@ public class ServerFacadeTests {
     static ServerFacade facade;
 
     @BeforeAll
-    public static void init() throws Exception {
+    public static void init() {
         server = new Server();
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
@@ -140,7 +140,7 @@ public class ServerFacadeTests {
         var createResult = facade.createGame(new CreateGameRequest("TestGame"), authToken);
         assertTrue(createResult.gameID() > 0, "Game ID should be positive");
 
-        facade.joinGame(new JoinGameRequest(loginResult.username(), "WHITE", 1), authToken);
+        facade.joinGame(new JoinGameRequest("WHITE", 1), authToken);
         var games = facade.listGames(new GameListRequest(authToken), authToken);
 
         var joinedGame = games.games().getFirst();
@@ -156,10 +156,10 @@ public class ServerFacadeTests {
         var createResult = facade.createGame(new CreateGameRequest("TestGame"), authToken);
         assertTrue(createResult.gameID() > 0, "Game ID should be positive");
 
-        facade.joinGame(new JoinGameRequest(loginResult.username(),"WHITE", 1), authToken);
+        facade.joinGame(new JoinGameRequest("WHITE", 1), authToken);
 
         assertThrows(Exception.class, () -> {
-            facade.joinGame(new JoinGameRequest(loginResult.username(),"WHITE", 1), authToken);
+            facade.joinGame(new JoinGameRequest("WHITE", 1), authToken);
         });
     }
 }

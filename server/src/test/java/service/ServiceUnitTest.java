@@ -71,7 +71,7 @@ public class ServiceUnitTest {
         DataAccessException ex = assertThrows(DataAccessException.class, () -> {
             userService.login(new LoginRequest("sam", "wrongpass"));
         });
-        assertTrue(ex.getMessage().contains("Incorrect username or password"));
+        assertTrue(ex.getMessage().contains("Incorrect password"));
     }
 
     @Test

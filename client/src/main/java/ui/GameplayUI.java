@@ -58,12 +58,13 @@ public class GameplayUI {
                     return;
 
                 case "move":
+                    System.out.println("Give a start position and end position");
                     System.out.print("Enter move: ");
                     String moveInput = scanner.nextLine();
                     String[] parts = moveInput.split(" ");
 
                     if (parts.length < 2) {
-                        System.out.println("Invalid move format. Use: startPosition endPosition");
+                        System.out.println("Give a start position and end position");
                         break;
                     }
 

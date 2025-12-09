@@ -6,7 +6,6 @@ import com.google.gson.Gson;
 import dataaccess.*;
 import io.javalin.websocket.*;
 import model.GameData;
-import model.JoinGameRequest;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
@@ -168,6 +167,29 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         String notificationText = userGameCommand.getUsername() + " moved " + makeMoveCommand.getMove();
         NotificationMessage notificationMessage = new NotificationMessage(notificationText);
         connections.broadcastExcept(gameData.getGameID(), gson.toJson(notificationMessage), ctx);
+
+        ChessGame game = gameData.getGame();
+        ChessGame.TeamColor nextTurn = game.getTeamTurn();
+
+        if (game.isInCheckmate(nextTurn)) {
+            game.setGameOver(true);
+            gameDAO.updateGame(gameData);
+            String winner = (nextTurn == ChessGame.TeamColor.WHITE) ? "BLACK" : "WHITE";
+            NotificationMessage endMsg = new NotificationMessage("Checkmate! " + winner + " wins!");
+            connections.broadcast(gameData.getGameID(), gson.toJson(endMsg));
+            return;
+        }
+        if (game.isInStalemate(nextTurn)) {
+            game.setGameOver(true);
+            gameDAO.updateGame(gameData);
+            NotificationMessage endMsg = new NotificationMessage("Stalemate! The game is a draw.");
+            connections.broadcast(gameData.getGameID(), gson.toJson(endMsg));
+            return;
+        }
+        if (game.isInCheck(nextTurn)) {
+            NotificationMessage checkMsg = new NotificationMessage("Check against " + nextTurn + "!");
+            connections.broadcast(gameData.getGameID(), gson.toJson(checkMsg));
+        }
     }
 
     private void error(UserGameCommand userGameCommand, String errorMessage, WsContext ctx) throws IOException {
