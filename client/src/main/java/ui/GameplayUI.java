@@ -47,7 +47,8 @@ public class GameplayUI {
 
                     switch(playerType) {
                         case "Player":
-                            server.joinGame(new JoinGameRequest(playerColor.toUpperCase(), game.getGameID()), "LEAVE");
+                            server.joinGame(new JoinGameRequest(playerColor.toUpperCase(),
+                                    game.getGameID()), "LEAVE");
                             server.leave(authToken, game.getGameID());
                             break;
 
@@ -113,7 +114,8 @@ public class GameplayUI {
                         if (legalMoves == null || legalMoves.isEmpty()) {
                             System.out.println("No legal moves for this piece.");
                         } else {
-                            List<ChessPosition> highlightMoves = new java.util.ArrayList<>(legalMoves.stream()
+                            List<ChessPosition> highlightMoves =
+                                    new java.util.ArrayList<>(legalMoves.stream()
                                     .map(ChessMove::getEndPosition)
                                     .toList());
                             highlightMoves.add(pos);
